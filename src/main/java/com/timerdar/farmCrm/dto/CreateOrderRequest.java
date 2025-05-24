@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
+@Getter @Setter
+@AllArgsConstructor
 public class CreateOrderRequest {
 
     private long productId;
