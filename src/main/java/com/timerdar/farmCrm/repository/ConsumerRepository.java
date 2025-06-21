@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
-    List<Consumer> findAllByDistrictByOrderByNameAsc(String district);
+    List<Consumer> findAllByDistrictOrderByNameAsc(String district);
     @Query("select distinct district from Consumer")
     List<String> getDistrictsList();
     @Query(value = "select * from Consumer where starts_with(name, ?1)", nativeQuery = true)

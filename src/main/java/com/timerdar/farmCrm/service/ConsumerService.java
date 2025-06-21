@@ -18,7 +18,7 @@ public class ConsumerService {
     }
 
     public List<Consumer> getConsumersOfDistrict(String district){
-        return consumerRepository.findAllByDistrictByOrderByNameAsc(district);
+        return consumerRepository.findAllByDistrictOrderByNameAsc(district);
     }
 
     public List<String> getDistricts(){

@@ -21,13 +21,17 @@ public class OrderService {
     private PriceService priceService;
 
     public Order createOrder(CreateOrderRequest orderRequest){
-        Order newOrder = new Order();
-        newOrder.setCreatedAt(LocalDate.now());
-        newOrder.setAmount(orderRequest.getAmount());
-        newOrder.setProductId(orderRequest.getProductId());
-        newOrder.setConsumerId(orderRequest.getConsumerId());
-        newOrder.setStatus(OrderStatus.CREATED);
-        return orderRepository.save(newOrder);
+        if(orderRequest.isFullyEntered()){
+            Order newOrder = new Order();
+            newOrder.setProductId(orderRequest.getProductId());
+            newOrder.setCreatedAt(LocalDate.now());
+            newOrder.setConsumerId(orderRequest.getConsumerId());
+            newOrder.setAmount(orderRequest.getAmount());
+            newOrder.setWeight(orderRequest.getWeight());
+            return evalCost(orderRepository.save(newOrder).getId());
+        }else{
+            throw new IllegalArgumentException("Для создания заказа введены не все данные");
+        }
     }
 
     public List<Order> getOrdersOfConsumer(long consumerId, OrderStatus status){
@@ -44,25 +48,26 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Order moveOrderToDelivery(long id){
+    public Order changeAmount(long id, int newAmount){
         Order order = orderRepository.getReferenceById(id);
-        if (order.getCost() == 0){
-            Price price = priceService.getPriceById(order.getProductId());
-            if (price.isWeighed()){
-                order.setCost(price.getPrice() * order.getWeight());
-            }else{
-                order.setCost(price.getPrice() * order.getAmount());
-            }
+        order.setAmount(newAmount);
+        return evalCost(orderRepository.save(order).getId());
+    }
+
+    public Order changeWeight(long id, double newWeight){
+        Order order = orderRepository.getReferenceById(id);
+        order.setWeight(newWeight);
+        return evalCost(orderRepository.save(order).getId());
+    }
+
+    public Order evalCost(long id){
+        Order order = orderRepository.getReferenceById(id);
+        Price price = priceService.getPriceById(order.getProductId());
+        if (price.isWeighed()){
+            order.setCost(price.getPrice() * order.getWeight());
+        }else{
+            order.setCost(price.getPrice() * order.getAmount());
         }
-        Order newOrder = orderRepository.save(order);
-        return changeStatus(newOrder.getId(), OrderStatus.DELIVERY);
-    }
-
-    public Order moveOrderToDone(long id){
-        return changeStatus(id, OrderStatus.DONE);
-    }
-
-    public Order moveOrderToCreated(long id){
-        return changeStatus(id, OrderStatus.CREATED);
+        return orderRepository.save(order);
     }
 }

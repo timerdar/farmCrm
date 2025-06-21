@@ -1,5 +1,6 @@
 package com.timerdar.farmCrm.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,5 +19,10 @@ public class Price {
     private String productName;
     private int price;
     private boolean isWeighed;
+
+    @JsonIgnore
+    public boolean isValid(){
+        return price > 0 && productName != null;
+    }
 
 }
