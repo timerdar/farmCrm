@@ -37,4 +37,7 @@ public class PriceService {
         }
     }
 
+    public boolean isPriceExists(long id){
+        return priceRepository.existsById(id);
+    }
 }

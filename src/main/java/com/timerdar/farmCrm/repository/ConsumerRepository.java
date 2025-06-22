@@ -13,5 +13,5 @@ public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
     @Query("select distinct district from Consumer")
     List<String> getDistrictsList();
     @Query(value = "select * from Consumer where starts_with(name, ?1)", nativeQuery = true)
-    Consumer findByNamePrefix(String prefix);
+    List<Consumer> findByNamePrefix(String prefix);
 }

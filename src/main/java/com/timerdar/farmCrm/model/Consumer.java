@@ -1,5 +1,6 @@
 package com.timerdar.farmCrm.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,13 @@ public class Consumer {
     private String district;
     private String phoneNumber;
 
+    @JsonIgnore
+    public boolean isValid(){
+        return isPresent(name) && isPresent(deliveryAddress) && isPresent(district) && isPresent(phoneNumber);
+    }
+
+    @JsonIgnore
+    private boolean isPresent(String value){
+        return value != null && !value.isEmpty();
+    }
 }

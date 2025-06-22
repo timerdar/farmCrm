@@ -14,7 +14,11 @@ public class ConsumerService {
     private ConsumerRepository consumerRepository;
 
     public Consumer createConsumer(Consumer consumer){
-        return consumerRepository.save(consumer);
+        if (consumer.isValid()){
+            return consumerRepository.save(consumer);
+        }else{
+            throw new IllegalArgumentException("Для создания заказчика введены не все данные");
+        }
     }
 
     public List<Consumer> getConsumersOfDistrict(String district){
@@ -25,7 +29,11 @@ public class ConsumerService {
         return consumerRepository.getDistrictsList();
     }
 
-    public Consumer getConsumerByName(String name){
+    public List<Consumer> getConsumerByName(String name){
         return consumerRepository.findByNamePrefix(name);
+    }
+
+    public boolean isConsumerExists(long id){
+        return consumerRepository.existsById(id);
     }
 }

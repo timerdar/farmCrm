@@ -5,6 +5,7 @@ import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.model.Price;
 import com.timerdar.farmCrm.repository.OrderRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +21,17 @@ public class OrderService {
     @Autowired
     private PriceService priceService;
 
+    @Autowired
+    private ConsumerService consumerService;
+
     public Order createOrder(CreateOrderRequest orderRequest){
-        if(orderRequest.isFullyEntered()){
+        if(!orderRequest.isFullyEntered()){
+            throw new IllegalArgumentException("Для создания заказа введены не все данные");
+        }else if (!priceService.isPriceExists(orderRequest.getProductId())){
+            throw new EntityNotFoundException("Указанной позиции в прайс-листе нет");
+        }else if(!consumerService.isConsumerExists(orderRequest.getConsumerId())){
+            throw new EntityNotFoundException("Указанного заказчика нет в системе");
+        }else {
             Order newOrder = new Order();
             newOrder.setProductId(orderRequest.getProductId());
             newOrder.setCreatedAt(LocalDate.now());
@@ -29,8 +39,6 @@ public class OrderService {
             newOrder.setAmount(orderRequest.getAmount());
             newOrder.setWeight(orderRequest.getWeight());
             return evalCost(orderRepository.save(newOrder).getId());
-        }else{
-            throw new IllegalArgumentException("Для создания заказа введены не все данные");
         }
     }
 

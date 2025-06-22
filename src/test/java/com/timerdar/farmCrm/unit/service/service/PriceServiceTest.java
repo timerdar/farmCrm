@@ -1,7 +1,8 @@
-package com.timerdar.farmCrm.service;
+package com.timerdar.farmCrm.unit.service.service;
 
 import com.timerdar.farmCrm.model.Price;
 import com.timerdar.farmCrm.repository.PriceRepository;
+import com.timerdar.farmCrm.service.PriceService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
+import javax.lang.model.element.PackageElement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -62,13 +64,22 @@ class PriceServiceTest {
     }
 
     @Test
-    void getPriceById_shouldThrowEntityNotFound() {
+    void getPriceById_shouldThrowEntityNotFound_whenIdNotExists() {
         long priceId = 2L;
         when(repository.findById(priceId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
             priceService.getPriceById(priceId);
         });
+    }
 
+    @Test
+    void getPriceById_shouldReturnPrice_whenIdExists(){
+        Price price = new Price(3L, "Курица", 300, true);
+        when(repository.findById(3L)).thenReturn(Optional.of(price));
+
+        Price actual = priceService.getPriceById(3L);
+
+        assertEquals(price, actual);
     }
 }
