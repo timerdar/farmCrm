@@ -34,6 +34,6 @@ public class ConsumerService {
     }
 
     public boolean isConsumerExists(long id){
-        return consumerRepository.existsById(id);
+            return consumerRepository.existsById(id);
     }
 }
