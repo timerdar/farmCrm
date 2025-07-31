@@ -1,6 +1,5 @@
 package com.timerdar.farmCrm.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +20,7 @@ public class Order {
     private long id;
     private long productId;
     private long consumerId;
-    private int amount;
+    private int count;
     private double cost;
     private double weight;
     private OrderStatus status;
@@ -31,11 +30,11 @@ public class Order {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Order order = (Order) o;
-        return id == order.id && productId == order.productId && consumerId == order.consumerId && amount == order.amount && Double.compare(cost, order.cost) == 0 && Double.compare(weight, order.weight) == 0 && status == order.status && Objects.equals(createdAt, order.createdAt);
+        return id == order.id && productId == order.productId && consumerId == order.consumerId && count == order.count && Double.compare(cost, order.cost) == 0 && Double.compare(weight, order.weight) == 0 && status == order.status && Objects.equals(createdAt, order.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, productId, consumerId, amount, cost, weight, status, createdAt);
+        return Objects.hash(id, productId, consumerId, count, cost, weight, status, createdAt);
     }
 }

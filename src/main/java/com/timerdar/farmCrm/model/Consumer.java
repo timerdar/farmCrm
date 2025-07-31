@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "consumers")
 public class Consumer {
 
     @Id
@@ -16,14 +17,14 @@ public class Consumer {
     @Column(unique = true)
     private String name;
     @Column(nullable = false)
-    private String deliveryAddress;
+    private String address;
     @Column(nullable = false)
-    private String district;
-    private String phoneNumber;
+    private String phone;
+    private int totalSum;
 
     @JsonIgnore
     public boolean isValid(){
-        return isPresent(name) && isPresent(deliveryAddress) && isPresent(district) && isPresent(phoneNumber);
+        return isPresent(name) && isPresent(address)  && isPresent(phone);
     }
 
     @JsonIgnore

@@ -3,7 +3,7 @@ package com.timerdar.farmCrm.service;
 import com.timerdar.farmCrm.dto.CreateOrderRequest;
 import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
-import com.timerdar.farmCrm.model.Price;
+import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private PriceService priceService;
+    private ProductService productService;
 
     @Autowired
     private ConsumerService consumerService;
@@ -27,7 +27,7 @@ public class OrderService {
     public Order createOrder(CreateOrderRequest orderRequest){
         if(!orderRequest.isFullyEntered()){
             throw new IllegalArgumentException("Для создания заказа введены не все данные");
-        }else if (!priceService.isPriceExists(orderRequest.getProductId())){
+        }else if (!productService.isPriceExists(orderRequest.getProductId())){
             throw new EntityNotFoundException("Указанной позиции в прайс-листе нет");
         }else if(!consumerService.isConsumerExists(orderRequest.getConsumerId())){
             throw new EntityNotFoundException("Указанного заказчика нет в системе");
@@ -36,7 +36,7 @@ public class OrderService {
             newOrder.setProductId(orderRequest.getProductId());
             newOrder.setCreatedAt(LocalDate.now());
             newOrder.setConsumerId(orderRequest.getConsumerId());
-            newOrder.setAmount(orderRequest.getAmount());
+            newOrder.setCount(orderRequest.getAmount());
             newOrder.setWeight(orderRequest.getWeight());
             return evalCost(orderRepository.save(newOrder).getId());
         }
@@ -58,7 +58,7 @@ public class OrderService {
 
     public Order changeAmount(long id, int newAmount){
         Order order = orderRepository.getReferenceById(id);
-        order.setAmount(newAmount);
+        order.setCount(newAmount);
         return evalCost(orderRepository.save(order).getId());
     }
 
@@ -70,11 +70,11 @@ public class OrderService {
 
     public Order evalCost(long id){
         Order order = orderRepository.getReferenceById(id);
-        Price price = priceService.getPriceById(order.getProductId());
-        if (price.isWeighed()){
-            order.setCost(price.getPrice() * order.getWeight());
+        Product product = productService.getProductById(order.getProductId());
+        if (product.isWeighed()){
+            order.setCost(product.getPrice() * order.getWeight());
         }else{
-            order.setCost(price.getPrice() * order.getAmount());
+            order.setCost(product.getPrice() * order.getCount());
         }
         return orderRepository.save(order);
     }

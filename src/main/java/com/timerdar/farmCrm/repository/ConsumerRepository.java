@@ -9,9 +9,17 @@ import java.util.List;
 
 @Repository
 public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
-    List<Consumer> findAllByDistrictOrderByNameAsc(String district);
-    @Query("select distinct district from Consumer")
-    List<String> getDistrictsList();
-    @Query(value = "select * from Consumer where starts_with(name, ?1)", nativeQuery = true)
-    List<Consumer> findByNamePrefix(String prefix);
+
+    @Query(value = "SELECT \n" +
+            "    c.id, \n" +
+            "    c.name, \n" +
+            "    c.address, \n" +
+            "    c.phone, \n" +
+            "    COUNT(o.id) FILTER (WHERE o.status = 'CREATED') AS created_orders_count\n" +
+            "FROM consumers c\n" +
+            "LEFT JOIN orders o ON o.consumerid = c.id\n" +
+            "GROUP BY c.id, c.name, c.address, c.phone\n" +
+            "ORDER BY created_orders_count DESC;", nativeQuery = true)
+    List<Consumer> findAllSorted();
+
 }

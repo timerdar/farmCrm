@@ -13,29 +13,31 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-public class Price {
+@Table(name = "products")
+public class Product {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(unique = true, nullable = false)
-    private String productName;
+    private String name;
     private int price;
     private boolean isWeighed;
+    private int createdCount;
 
     @JsonIgnore
     public boolean isValid(){
-        return price > 0 && productName != null && !productName.isEmpty();
+        return price > 0 && name != null && !name.isEmpty();
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Price price1 = (Price) o;
-        return id == price1.id && price == price1.price && isWeighed == price1.isWeighed && Objects.equals(productName, price1.productName);
+        Product product1 = (Product) o;
+        return id == product1.id && price == product1.price && isWeighed == product1.isWeighed && Objects.equals(name, product1.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, productName, price, isWeighed);
+        return Objects.hash(id, name, price, isWeighed);
     }
 }
