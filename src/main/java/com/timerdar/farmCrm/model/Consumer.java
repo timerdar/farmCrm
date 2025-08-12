@@ -3,11 +3,13 @@ package com.timerdar.farmCrm.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Table(name = "consumers")
 public class Consumer {
 

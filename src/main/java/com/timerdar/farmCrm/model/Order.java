@@ -23,6 +23,7 @@ public class Order {
     private int count;
     private double cost;
     private double weight;
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private LocalDate createdAt;
 
