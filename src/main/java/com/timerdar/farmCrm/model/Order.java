@@ -21,7 +21,7 @@ public class Order {
     private long productId;
     private long consumerId;
     private int count;
-    private double cost;
+    private int cost;
     private double weight;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

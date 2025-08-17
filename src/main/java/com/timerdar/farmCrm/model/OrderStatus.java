@@ -4,6 +4,7 @@ public enum OrderStatus {
     DONE,
     DELIVERY,
     CREATED,
+    ARCHIVED,
     DELETED
 }
  

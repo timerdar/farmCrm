@@ -10,7 +10,11 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Modifying
-    @Query(value = "update Product set createdCount = ?2 where id = ?1;", nativeQuery = true)
-    Product updateCreatedCount(int productId, int createdCount);
+    @Query(value = "update Products set created_count = ?2 where id = ?1;", nativeQuery = true)
+    int updateCreatedCount(long productId, int createdCount);
+
+    @Modifying
+    @Query(value = "update Products set cost = ?2 where id = ?1;", nativeQuery = true)
+    int updatePrice(long productId, double cost);
 
 }

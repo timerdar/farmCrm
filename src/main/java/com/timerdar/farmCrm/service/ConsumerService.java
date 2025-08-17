@@ -49,4 +49,9 @@ public class ConsumerService {
     public boolean isConsumerExists(long id){
         return consumerRepository.existsById(id);
     }
+
+    @Transactional
+    public int increaseTotalSum(long consumerId, int value){
+        return consumerRepository.increaseTotalSum(consumerId, value);
+    }
 }

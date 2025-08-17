@@ -19,7 +19,7 @@ public class ConsumerController {
     private ConsumerService consumerService;
 
     @PostMapping
-    public Consumer createConsumer(CreateConsumerRequest request){
+    public Consumer createConsumer(@RequestBody CreateConsumerRequest request){
         return consumerService.createConsumer(request);
     }
 
@@ -34,7 +34,7 @@ public class ConsumerController {
     }
 
     @PostMapping("/change-phone")
-    public ResponseEntity<?> changePhone(ConsumerChangeRequest request){
+    public ResponseEntity<?> changePhone(@RequestBody ConsumerChangeRequest request){
         int changed = consumerService.updatePhone(request.getId(), request.getPhone());
         if(changed > 0){
             return ResponseEntity.ok().build();
@@ -44,8 +44,12 @@ public class ConsumerController {
     }
 
     @PostMapping("/change-address")
-    public ResponseEntity<?> changeAddress(ConsumerChangeRequest request){
-        consumerService.updateAddress(request.getId(), request.getAddress());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> changeAddress(@RequestBody ConsumerChangeRequest request){
+        int changed = consumerService.updateAddress(request.getId(), request.getAddress());
+        if(changed > 0) {
+            return ResponseEntity.ok().build();
+        }else{
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

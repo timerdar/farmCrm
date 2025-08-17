@@ -1,6 +1,7 @@
 package com.timerdar.farmCrm.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.timerdar.farmCrm.dto.ShortProductInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,24 +21,29 @@ public class Product {
     private long id;
     @Column(unique = true, nullable = false)
     private String name;
-    private int price;
+    private int cost;
     private boolean isWeighed;
     private int createdCount;
 
     @JsonIgnore
     public boolean isValid(){
-        return price > 0 && name != null && !name.isEmpty();
+        return cost > 0 && name != null && !name.isEmpty();
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Product product1 = (Product) o;
-        return id == product1.id && price == product1.price && isWeighed == product1.isWeighed && Objects.equals(name, product1.name);
+        return id == product1.id && cost == product1.cost && isWeighed == product1.isWeighed && Objects.equals(name, product1.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, price, isWeighed);
+        return Objects.hash(id, name, cost, isWeighed);
+    }
+
+    @JsonIgnore
+    public ShortProductInfo toShort(){
+        return new ShortProductInfo(this.getId(), this.getName());
     }
 }
