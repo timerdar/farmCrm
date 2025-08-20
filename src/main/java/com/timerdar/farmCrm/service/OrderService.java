@@ -3,7 +3,7 @@ package com.timerdar.farmCrm.service;
 import com.timerdar.farmCrm.dto.ConsumerWithOrders;
 import com.timerdar.farmCrm.dto.CreateOrderRequest;
 import com.timerdar.farmCrm.dto.OrderChangeRequest;
-import com.timerdar.farmCrm.dto.OrderWithName;
+import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
@@ -48,13 +48,18 @@ public class OrderService {
         }
     }
 
-    public List<OrderWithName> getOrdersWithName(long id, String source, String status){
+    public List<OrderWithNameAndWeightable> getOrdersWithName(long id, String source, String status){
         OrderStatus orderStatus = OrderStatus.valueOf(status);
-        List<OrderWithName> ordersWithName = new ArrayList<>();
+        List<OrderWithNameAndWeightable> ordersWithName = new ArrayList<>();
         List<Order> orders = source.equals("products") ? getOrdersOfProduct(id, orderStatus) : getOrdersOfConsumer(id, orderStatus);
         for(Order order: orders){
-            String name = source.equals("consumers") ? productService.getProductById(order.getProductId()).getName() : consumerService.getConsumerById(order.getConsumerId()).getName();
-            ordersWithName.add(new OrderWithName(order, name));
+            if(source.equals("consumers")){
+                Product product = productService.getProductById(order.getProductId());
+                ordersWithName.add(new OrderWithNameAndWeightable(order, product.getName(), product.isWeighed()));
+            }else{
+                Consumer consumer = consumerService.getConsumerById(order.getConsumerId());
+                ordersWithName.add(new OrderWithNameAndWeightable(order, consumer.getName(), true));
+            }
         }
         return ordersWithName;
     }
@@ -102,10 +107,12 @@ public class OrderService {
 
     public List<ConsumerWithOrders> getDeliveryData() {
         List<Long> consumerIds = orderRepository.getConsumerIdsByStatus("DELIVERY");
+        consumerIds.addAll(orderRepository.getConsumerIdsByStatus("DONE"));
         List<ConsumerWithOrders> consumers = new ArrayList<>();
         for (Long consumerId: consumerIds){
             Consumer consumer = consumerService.getConsumerById(consumerId);
-            List<OrderWithName> orders = getOrdersWithName(consumerId, "consumers", "DELIVERY");
+            List<OrderWithNameAndWeightable> orders = getOrdersWithName(consumerId, "consumers", "DELIVERY");
+            orders.addAll(getOrdersWithName(consumerId, "consumers", "DONE"));
             consumers.add(new ConsumerWithOrders(consumer, orders));
         }
         return consumers;
@@ -121,5 +128,10 @@ public class OrderService {
             count++;
         }
         return count;
+    }
+
+    public int getOrdersCount(long productId, OrderStatus status){
+        Integer amount = orderRepository.getOrderedProductAmountByIdAndStatus(productId, status.toString());
+        return amount != null ? amount : 0;
     }
 }

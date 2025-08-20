@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class OrderWithName extends Order {
+public class OrderWithNameAndWeightable extends Order {
 
     private String name;
+    private boolean weighed;
 
-    public OrderWithName(Order order, String name){
+    public OrderWithNameAndWeightable(Order order, String name, boolean weighed){
         setName(name);
+        setWeighed(weighed);
         setId(order.getId());
         setCost(order.getCost());
         setCount(order.getCount());

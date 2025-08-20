@@ -3,7 +3,7 @@ package com.timerdar.farmCrm.controller;
 import com.timerdar.farmCrm.dto.ConsumerWithOrders;
 import com.timerdar.farmCrm.dto.CreateOrderRequest;
 import com.timerdar.farmCrm.dto.OrderChangeRequest;
-import com.timerdar.farmCrm.dto.OrderWithName;
+import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class OrderController {
     }
 
     @GetMapping("/{source}/{id}")
-    public List<OrderWithName> getOrders(@PathVariable("id") long id, @PathVariable("source") String source, @RequestParam(name = "status", defaultValue = "CREATED") String status){
+    public List<OrderWithNameAndWeightable> getOrders(@PathVariable("id") long id, @PathVariable("source") String source, @RequestParam(name = "status", defaultValue = "CREATED") String status){
         return orderService.getOrdersWithName(id, source, status);
     }
 

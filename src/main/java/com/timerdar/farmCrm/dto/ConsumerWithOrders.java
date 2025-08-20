@@ -8,9 +8,9 @@ import java.util.List;
 
 @Getter @Setter
 public class ConsumerWithOrders extends Consumer {
-    private List<OrderWithName> orders;
+    private List<OrderWithNameAndWeightable> orders;
 
-    public ConsumerWithOrders(Consumer consumer, List<OrderWithName> orders){
+    public ConsumerWithOrders(Consumer consumer, List<OrderWithNameAndWeightable> orders){
         super(consumer.getId(), consumer.getName(), consumer.getAddress(), consumer.getPhone(), consumer.getTotalSum());
         this.orders = orders;
     }

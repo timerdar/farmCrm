@@ -1,12 +1,15 @@
 package com.timerdar.farmCrm.service;
 
 import com.timerdar.farmCrm.dto.CreateProductRequest;
+import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.dto.ShortProductInfo;
+import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,22 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    @Lazy
+    private OrderService orderService;
+
     public Product createProduct(CreateProductRequest request){
         request.check();
         Product product = new Product(0, request.getName(), request.getCost(), request.isWeightable(), 0);
         return productRepository.save(product);
     }
 
-    public List<Product> getProductsList(){
-        return productRepository.findAll(Sort.by("name"));
+    public List<ProductWithOrdersCount> getProductsList(){
+        List<ProductWithOrdersCount> res = new ArrayList<>();
+        for (Product product : productRepository.findAll(Sort.by("name"))){
+            res.add(new ProductWithOrdersCount(product, orderService.getOrdersCount(product.getId(), OrderStatus.CREATED)));
+        }
+        return res;
     }
 
     public Product getProductById(long id){
