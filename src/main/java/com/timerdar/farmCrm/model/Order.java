@@ -38,4 +38,19 @@ public class Order {
     public int hashCode() {
         return Objects.hash(id, productId, consumerId, count, cost, weight, status, createdAt);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Order{");
+        sb.append("id=").append(id);
+        sb.append(", productId=").append(productId);
+        sb.append(", consumerId=").append(consumerId);
+        sb.append(", count=").append(count);
+        sb.append(", cost=").append(cost);
+        sb.append(", weight=").append(weight);
+        sb.append(", status=").append(status);
+        sb.append(", createdAt=").append(createdAt);
+        sb.append('}');
+        return sb.toString();
+    }
 }

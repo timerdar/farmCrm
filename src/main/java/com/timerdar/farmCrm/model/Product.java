@@ -46,4 +46,16 @@ public class Product {
     public ShortProductInfo toShort(){
         return new ShortProductInfo(this.getId(), this.getName());
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Product{");
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", cost=").append(cost);
+        sb.append(", isWeighed=").append(isWeighed);
+        sb.append(", createdCount=").append(createdCount);
+        sb.append('}');
+        return sb.toString();
+    }
 }

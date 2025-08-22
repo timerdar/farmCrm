@@ -33,4 +33,16 @@ public class Consumer {
     private boolean isPresent(String value){
         return value != null && !value.isEmpty();
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Consumer{");
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", address='").append(address).append('\'');
+        sb.append(", phone='").append(phone).append('\'');
+        sb.append(", totalSum=").append(totalSum);
+        sb.append('}');
+        return sb.toString();
+    }
 }

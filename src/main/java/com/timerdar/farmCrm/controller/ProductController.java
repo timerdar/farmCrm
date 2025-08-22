@@ -32,7 +32,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product getProduct(@PathVariable long id){
+    public ProductWithOrdersCount getProduct(@PathVariable long id){
         return productService.getProductById(id);
     }
 
@@ -44,7 +44,7 @@ public class ProductController {
     @PostMapping("/change-created-count")
     public ResponseEntity<?> changeCreatedCount(@RequestBody ProductChangeRequest request){
         int count = productService.changeCreatedCount(request.getId(), request.getCreatedCount());
-        if(count == 0){
+        if(count > 0){
             return ResponseEntity.ok().build();
         }else{
             return ResponseEntity.badRequest().build();
@@ -54,7 +54,7 @@ public class ProductController {
     @PostMapping("/change-price")
     public ResponseEntity<?> changePrice(@RequestBody ProductChangeRequest request){
         int count = productService.changePrice(request.getId(), request.getCost());
-        if(count == 0){
+        if(count > 0){
             return ResponseEntity.ok().build();
         }else{
             return ResponseEntity.badRequest().build();

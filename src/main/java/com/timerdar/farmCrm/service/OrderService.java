@@ -10,6 +10,7 @@ import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class OrderService {
 
     @Autowired
@@ -44,7 +46,9 @@ public class OrderService {
             newOrder.setCount(orderRequest.getAmount());
             newOrder.setWeight(0);
             newOrder.setStatus(OrderStatus.CREATED);
-            return evalCost(orderRepository.save(newOrder).getId());
+            Order createdOrder = orderRepository.save(newOrder);
+            log.info("Создание заказа:{}", createdOrder);
+            return evalCost(createdOrder.getId());
         }
     }
 
@@ -61,6 +65,7 @@ public class OrderService {
                 ordersWithName.add(new OrderWithNameAndWeightable(order, consumer.getName(), true));
             }
         }
+        log.info("Получение заказов: source = {}, {}Id = {}, status = {}", source, source, id, status);
         return ordersWithName;
     }
 
@@ -75,33 +80,41 @@ public class OrderService {
     public Order changeStatus(OrderChangeRequest request){
         OrderStatus newStatus = OrderStatus.valueOf(request.getStatus());
         Order order = orderRepository.getReferenceById(request.getId());
+        String oldStatus = order.getStatus().toString();
         if (request.getStatus().equals("ARCHIVED")){
             consumerService.increaseTotalSum(order.getConsumerId(), order.getCost());
         }
         order.setStatus(newStatus);
+        log.info("Изменение статус заказа c id = {} из {} в {}", request.getId(), oldStatus, request.getStatus());
         return orderRepository.save(order);
     }
 
     public Order changeAmount(OrderChangeRequest request){
         Order order = orderRepository.getReferenceById(request.getId());
         order.setCount(request.getAmount());
+        log.info("Изменение количества в заказе: orderId = {}, newAmount = {}", request.getId(), request.getAmount());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order changeWeight(OrderChangeRequest request){
         Order order = orderRepository.getReferenceById(request.getId());
         order.setWeight(request.getWeight());
+        log.info("Изменение веса заказа: orderId = {}, newWeight = {}", request.getId(), request.getWeight());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order evalCost(long id){
         Order order = orderRepository.getReferenceById(id);
         Product product = productService.getProductById(order.getProductId());
+        int cost;
         if (product.isWeighed()){
-            order.setCost((int) (product.getCost() * order.getWeight()));
+            cost = (int) (product.getCost() * order.getWeight());
+            log.info("Пересчет стоимости заказа с весом: orderId = {}, product = {}, newCost = {}", id, product.getName(), cost);
         }else{
-            order.setCost(product.getCreatedCount() * order.getCount());
+            cost = (product.getCost() * order.getCount());
+            log.info("Пересчет стоимости штучного заказа: orderId = {}, product = {}, newCost = {}", id, product.getName(), cost);
         }
+        order.setCost(cost);
         return orderRepository.save(order);
     }
 
@@ -127,6 +140,7 @@ public class OrderService {
             changeStatus(request);
             count++;
         }
+        log.info("Очистка доставки");
         return count;
     }
 

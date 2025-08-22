@@ -8,6 +8,7 @@ import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ProductService {
 
@@ -30,21 +32,27 @@ public class ProductService {
     public Product createProduct(CreateProductRequest request){
         request.check();
         Product product = new Product(0, request.getName(), request.getCost(), request.isWeightable(), 0);
-        return productRepository.save(product);
+        Product createdProduct = productRepository.save(product);
+        log.info("Создание продукта: {}", createdProduct);
+        return createdProduct;
     }
 
     public List<ProductWithOrdersCount> getProductsList(){
         List<ProductWithOrdersCount> res = new ArrayList<>();
         for (Product product : productRepository.findAll(Sort.by("name"))){
-            res.add(new ProductWithOrdersCount(product, orderService.getOrdersCount(product.getId(), OrderStatus.CREATED)));
+            int ordersCount = orderService.getOrdersCount(product.getId(), OrderStatus.CREATED) + orderService.getOrdersCount(product.getId(), OrderStatus.DELIVERY);
+            res.add(new ProductWithOrdersCount(product, ordersCount));
         }
+        log.info("Получение списка продуктов");
         return res;
     }
 
-    public Product getProductById(long id){
+    public ProductWithOrdersCount getProductById(long id){
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()){
-            return product.get();
+            int ordersCount = orderService.getOrdersCount(product.get().getId(), OrderStatus.CREATED) + orderService.getOrdersCount(product.get().getId(), OrderStatus.DELIVERY);
+            log.info("Получение продукта: id = {}", id);
+            return new ProductWithOrdersCount(product.get(), ordersCount);
         }else{
             throw new EntityNotFoundException("Такой позиции не существует");
         }
@@ -55,6 +63,7 @@ public class ProductService {
         for(Product product: getProductsList()){
             shortProducts.add(product.toShort());
         }
+        log.info("Получение short-листа продуктов");
         return shortProducts;
     }
 
@@ -64,11 +73,13 @@ public class ProductService {
 
     @Transactional
     public int changeCreatedCount(long id, int createdCount){
+        log.info("Изменение createdCount: id = {}, newCreatedCount = {}", id, createdCount);
         return productRepository.updateCreatedCount(id, createdCount);
     }
 
     @Transactional
     public int changePrice(long id, double cost){
+        log.info("Изменение цены продукта: id = {}, newPrice = {}", id, cost);
         return productRepository.updatePrice(id, cost);
     }
 }
