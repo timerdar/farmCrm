@@ -1,9 +1,6 @@
 package com.timerdar.farmCrm.controller;
 
-import com.timerdar.farmCrm.dto.ConsumerWithOrders;
-import com.timerdar.farmCrm.dto.CreateOrderRequest;
-import com.timerdar.farmCrm.dto.OrderChangeRequest;
-import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
+import com.timerdar.farmCrm.dto.*;
 import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +55,10 @@ public class OrderController {
         }else{
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/delivery-summary")
+    public List<DeliverySummaryItem> getDeliverySummary(){
+        return orderService.getDeliverySummary();
     }
 }

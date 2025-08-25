@@ -1,9 +1,6 @@
 package com.timerdar.farmCrm.service;
 
-import com.timerdar.farmCrm.dto.ConsumerWithOrders;
-import com.timerdar.farmCrm.dto.CreateOrderRequest;
-import com.timerdar.farmCrm.dto.OrderChangeRequest;
-import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
+import com.timerdar.farmCrm.dto.*;
 import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
@@ -139,6 +136,7 @@ public class OrderService {
             request.setStatus("ARCHIVED");
             changeStatus(request);
             count++;
+            consumerService.changeOrderNumForConsumer(order.getConsumerId(), 0);
         }
         log.info("Очистка доставки");
         return count;
@@ -148,4 +146,16 @@ public class OrderService {
         Integer amount = orderRepository.getOrderedProductAmountByIdAndStatus(productId, status.toString());
         return amount != null ? amount : 0;
     }
+
+    public List<DeliverySummaryItem> getDeliverySummary(){
+        List<Product> products = productService.getProductsFromDelivery();
+        List<DeliverySummaryItem> res = new ArrayList<>();
+        for (Product product: products){
+            res.add(new DeliverySummaryItem(product.getName(),
+                    product.getCreatedCount(),
+                    getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE)));
+        }
+        return res;
+    }
+
 }

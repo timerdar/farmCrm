@@ -82,4 +82,9 @@ public class ProductService {
         log.info("Изменение цены продукта: id = {}, newPrice = {}", id, cost);
         return productRepository.updatePrice(id, cost);
     }
+
+    public List<Product> getProductsFromDelivery(){
+        log.info("Получение списка продуктов, которые находятся в доставке");
+        return productRepository.getProductsListFromDelivery();
+    }
 }

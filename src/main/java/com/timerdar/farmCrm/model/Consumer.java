@@ -5,11 +5,12 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@AllArgsConstructor
+@Getter @Setter
 @Table(name = "consumers")
 public class Consumer {
 
@@ -23,6 +24,8 @@ public class Consumer {
     @Column(nullable = false)
     private String phone;
     private int totalSum;
+    @Column(nullable = true)
+    private int deliveryOrderNumber;
 
     @JsonIgnore
     public boolean isValid(){
@@ -44,5 +47,13 @@ public class Consumer {
         sb.append(", totalSum=").append(totalSum);
         sb.append('}');
         return sb.toString();
+    }
+
+    public Consumer(long id, String name, String address, String phone, int totalSum) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.totalSum = totalSum;
     }
 }

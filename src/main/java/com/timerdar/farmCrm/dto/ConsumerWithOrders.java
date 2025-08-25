@@ -11,7 +11,7 @@ public class ConsumerWithOrders extends Consumer {
     private List<OrderWithNameAndWeightable> orders;
 
     public ConsumerWithOrders(Consumer consumer, List<OrderWithNameAndWeightable> orders){
-        super(consumer.getId(), consumer.getName(), consumer.getAddress(), consumer.getPhone(), consumer.getTotalSum());
+        super(consumer.getId(), consumer.getName(), consumer.getAddress(), consumer.getPhone(), consumer.getTotalSum(), consumer.getDeliveryOrderNumber());
         this.orders = orders;
     }
 }

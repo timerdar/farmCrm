@@ -2,6 +2,7 @@ package com.timerdar.farmCrm.controller;
 
 import com.timerdar.farmCrm.dto.ConsumerChangeRequest;
 import com.timerdar.farmCrm.dto.CreateConsumerRequest;
+import com.timerdar.farmCrm.dto.DeliveryOrderNumForConsumer;
 import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.service.ConsumerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,5 +52,11 @@ public class ConsumerController {
         }else{
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping("/set-consumers-order")
+    public ResponseEntity<?> setConsumersOrder(@RequestBody List<DeliveryOrderNumForConsumer> nums){
+        consumerService.setDeliveryConsumersOrder(nums);
+        return ResponseEntity.ok().build();
     }
 }

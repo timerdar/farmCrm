@@ -25,7 +25,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query(value = "select sum(cost) from Order where consumerId = :1 and status = :2;", nativeQuery = true)
     double getSummaryOrderCostOfConsumerByIdAndStatus(long consumerId, OrderStatus status);
 
-    @Query(value = "select distinct o.consumer_id from orders o where o.status = :status;", nativeQuery = true)
+    @Query(value = "select distinct o.consumer_id, c.delivery_order_number\n" +
+            "from orders o\n" +
+            "join consumers c on o.consumer_id = c.id\n" +
+            "where o.status = :status\n" +
+            "order by c.delivery_order_number asc;", nativeQuery = true)
     List<Long> getConsumerIdsByStatus(@Param("status") String status);
 
     @Query(value = "select * from orders where status = 'DELIVERY' or status = 'DONE';", nativeQuery = true)

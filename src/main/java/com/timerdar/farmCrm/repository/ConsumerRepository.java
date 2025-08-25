@@ -35,4 +35,8 @@ public interface ConsumerRepository extends JpaRepository<Consumer, Long> {
     @Modifying
     @Query(value = "UPDATE consumers SET total_sum = total_sum + ?2 WHERE id = ?1;", nativeQuery = true)
     int increaseTotalSum(long consumerId, int value);
+
+    @Modifying
+    @Query(value = "UPDATE consumers SET delivery_order_number = ?2 WHERE id = ?1;", nativeQuery = true)
+    int changeOrderNumber(long consumerId, int number);
 }
