@@ -2,6 +2,8 @@ package com.timerdar.farmCrm.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -10,20 +12,28 @@ import java.util.Date;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+@Service
 public class JwtUtil {
 
-    private static final String SECRET = "your-very-secret-key-your-very-secret-key"; // минимум 256 бит для HS256
+    @Value("${jwt.secret}")
+    private String SECRET;
 
-    private static final long EXPIRATION_MS = 3600000; // 1 час
+    @Value("${jwt.lifetime}")
+    private long EXPIRATION_MS;
 
-    // Получение ключа (удобнее вынести в переменную)
-    private static final SecretKey secretKey = Keys.hmacShaKeyFor(SECRET.getBytes());
+    private SecretKey secretKey;
 
-    // Генерация JWT-токена
-    public static String generateToken(String username) {
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
+
+    public String generateToken(String username) {
         return Jwts.builder()
                 .subject(username)
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
@@ -32,7 +42,7 @@ public class JwtUtil {
     }
 
     // Извлечение username из токена
-    public static String extractUsername(String token) {
+    public String extractUsername(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -42,7 +52,7 @@ public class JwtUtil {
     }
 
     // Проверка валидности токена и срока жизни
-    public static boolean validateToken(String token, String username) {
+    public boolean validateToken(String token, String username) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
@@ -55,7 +65,7 @@ public class JwtUtil {
         }
     }
 
-    private static boolean isTokenExpired(Claims claims) {
+    private boolean isTokenExpired(Claims claims) {
         Date expiration = claims.getExpiration();
         return expiration.before(new Date());
     }

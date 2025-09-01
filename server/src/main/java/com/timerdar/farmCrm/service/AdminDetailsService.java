@@ -22,4 +22,8 @@ public class AdminDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return new User(admin.getLogin(), admin.getPasswordHash(), Collections.emptyList());
     }
+
+    public Admin createAdmin(String login, String passwordHash){
+        return adminRepository.save(new Admin(0L, login, passwordHash));
+    }
 }
