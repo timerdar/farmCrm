@@ -1,0 +1,23 @@
+{
+  "name": "farm-crm-client",
+  "version": "1.0.0",
+  "description": "FarmCRM Frontend - vanilla JavaScript client",
+  "scripts": {
+    "dev": "node -r dotenv/config node_modules/.bin/lite-server",
+    "start": "node -r dotenv/config node_modules/.bin/lite-server",
+    "build": "npm run build:prepare && npm run build:copy && npm run build:env",
+    "build:prepare": "mkdir -p dist",
+    "build:copy": "cp -r src/* dist/ && cp index.html dist/",
+    "build:env": "node scripts/build-env.js",
+    "clean": "rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.1",
+    "lite-server": "^2.6.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

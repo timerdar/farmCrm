@@ -1,0 +1,361 @@
+* {
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    margin: 0;
+    padding: 0;
+}
+
+hr {
+    width: 100%;
+}
+
+.app {
+    margin: 0 auto;
+    max-width: 800px;
+    padding: 10px;
+}
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.auth-form div,
+.change-form div {
+    flex: 1;
+}
+
+.auth-form input {
+    font-size: 24px;
+    margin-bottom: 5px;
+    border: 0;
+    flex: 1;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .3);
+}
+
+/*PAGE CONTAINTER*/
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+/*INPUT*/
+.search-input {
+    font-size: 24px;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    border: 0;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .3);
+    margin-bottom: 10px;
+}
+
+/*CARDS*/
+.card {
+    display: flex;
+    flex-direction: row;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-width: 320px;
+    margin-bottom: 15px;
+    gap: 10px
+}
+
+.card .text-with-label, .replacable-div, .mini-card .text-with-label {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+}
+
+.card .name {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    font-weight: bold;
+    font-size: 24px;
+    flex: 0.3 1 100px;
+}
+
+.label-row {
+    display: inline-flex;
+    gap: 4;
+}
+
+.text-with-label .text-content {
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 20px;
+    min-width: 0;
+}
+
+.editable-text input {
+    font-weight: bold;
+    margin-top: 5px;
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+.editable-text {
+    flex: 1 1 0;
+}
+
+/*CREATION CARD*/
+
+.creation-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-width: 320px;
+    margin-bottom: 15px;
+    gap: 10px
+}
+
+.creation-checkbox{
+    transform: scale(1.5);
+}
+
+.creation-card label{
+    align-items: center;
+}
+
+.forms {
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+.icon-label {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+
+/* BUTTON */
+.button {
+    background-color: #4A90E2;
+    /* насыщенный синий */
+    color: #fff;
+    /* белый текст */
+    margin-bottom: 10px;
+    padding: 12px 28px;
+    /* внутренние отступы */
+    border: none;
+    /* без рамки */
+    border-radius: 6px;
+    /* скругление углов */
+    font-size: 16px;
+    /* размер шрифта */
+    font-weight: 600;
+    /* полужирный шрифт */
+    cursor: pointer;
+    /* указатель при наведении */
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
+    /* лёгкая тень */
+}
+
+.button:hover {
+    background-color: #357ABD;
+    /* более тёмный синий при наведении */
+    box-shadow: 0 4px 16px rgba(74, 144, 226, 0.25);
+}
+
+.button:active {
+    background-color: #285180;
+    /* ещё темнее при нажатии */
+}
+
+/* ICON BUTTON */
+.icon-button {
+    border-color: black;
+    border-width: 1px;
+    background-color: #4A90E2;
+    box-shadow: 0 2px 10px rgba(21,169,239,0.06);
+    border-radius: 10px;
+    padding: 7px;
+    border-style: unset;
+    transition: background 0.18s, transform 0.14s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-button img {
+    width: 36px;
+    height: 36px;
+    transition: transform 0.18s;
+}
+.icon-button:hover,
+.icon-button:focus {
+    background: #e2f3ff;
+    transform: translateY(-3px) scale(1.07);
+}
+
+
+/* CONSUMER WITH ORDERS CARD*/
+
+.consumer-with-orders-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    min-width: 320px;
+    margin-bottom: 15px;
+    gap: 10px
+}
+
+.mini-card {
+  display: flex;
+  gap: 4px;
+  border-radius: 0px 10px;
+  box-shadow: 0 4px 30px rgba(80,140,210,0.08), 0 1.5px 5px rgba(40,73,128,0.05);
+  padding: 10px 10px;
+  min-width: 0px;
+  font-size: 16px;
+  position: relative;
+  align-items: center;
+  justify-self: start;
+  transition: background 0.2s;
+}
+
+.mini-card .label-row {
+    font-size: 14px;
+}
+
+/* Для чекбокса — делаем крупнее и удобнее */
+.mini-card .checkbox {
+  width: 28px;
+  height: 28px;
+  accent-color: #0a90da;
+  margin-right: 14px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.mini-card .name {
+    font-weight: bold;
+    flex: auto;
+    font-size: 20px;
+}
+
+
+/* ERROR POPUP */
+#error-popup {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  max-width: 300px;
+  background: #ffe5e5;
+  border: 1px solid #e62e2e;
+  border-radius: 5px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  z-index: 10000;
+  padding: 18px 30px 16px 16px;
+  font-family: Arial, sans-serif;
+  color: #ca2020;
+}
+#error-popup .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ca2020;
+  background: none;
+  border: none;
+}
+#error-popup .error-text {
+  margin-top: 4px;
+}
+
+
+/* Основная карточка */
+.creation-card {
+  width: 420px;
+  padding: 28px 24px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+}
+
+.creation-card label {
+  font-size: 22px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+}
+
+/* Контейнер для формы */
+.forms {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Контейнер для каждого input-а */
+.input-group {
+  position: relative;
+  font-size: 16px;
+}
+
+/* input */
+.creation-input {
+  width: 100%;
+  padding: 14px 12px 14px 12px;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.creation-input:focus {
+  border-color: #3f51b5;
+}
+
+/* label внутри input-group */
+.input-group label {
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: #777;
+  font-size: 16px;
+  pointer-events: none;
+  transition: 0.3s ease all;
+}
+
+/* Когда input в фокусе или есть текст — label поднимается */
+.creation-input:focus ~ label,
+.creation-input:not(:placeholder-shown) ~ label {
+  top: -8px;
+  left: 8px;
+  font-size: 12px;
+  color: #3f51b5;
+  background: #fff;
+  padding: 0 4px;
+}
