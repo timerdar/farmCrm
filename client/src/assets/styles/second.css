@@ -198,6 +198,11 @@ p {
     min-height: 52px;
 }
 
+.password-div {
+    display: flex;
+    flex-direction: row;
+}
+
 /* ===== ICON BUTTON ===== */
 .icon-button {
     display: inline-flex;
