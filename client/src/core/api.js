@@ -15,7 +15,7 @@ export function api(){
 
 
     instanse.interceptors.request.use((config) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('FARM_LOGIN');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -25,8 +25,8 @@ export function api(){
     instanse.interceptors.response.use(
         (response) => response,
         (error) => {
-            if (error.response && error.response.status === 401) {
-                navigateTo('/login');
+            if (error.response && (error.response.status == 401 || error.response.status == 403)) {
+                navigateTo('');
             }
             return Promise.reject(error);
         }

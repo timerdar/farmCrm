@@ -1,3 +1,5 @@
+import { api } from "../core/api.js";
+
 export async function auth(login, password){
     try{
         const data = {
@@ -5,8 +7,8 @@ export async function auth(login, password){
             password: password
         };
 
-        const response = await api().post('/login', data);
-        return response.status == 200;
+        const response = await api().post('/auth/login', data);
+        return response;
     }catch (error) {
         console.log(error);
         throw error;
