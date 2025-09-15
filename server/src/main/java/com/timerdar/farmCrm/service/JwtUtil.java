@@ -51,6 +51,19 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return !isTokenExpired(claims);
+        }catch (Exception e){
+            return false;
+        }
+    }
+
     // Проверка валидности токена и срока жизни
     public boolean validateToken(String token, String username) {
         try {
@@ -69,4 +82,6 @@ public class JwtUtil {
         Date expiration = claims.getExpiration();
         return expiration.before(new Date());
     }
+
+
 }

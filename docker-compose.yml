@@ -1,64 +1,41 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # PostgreSQL база данных
-  database:
-    image: postgres:15
-    container_name: farmcrm-db
-    restart: unless-stopped
+  postgresdb:
+    image: postgres:latest
     environment:
-      POSTGRES_DB: farmcrm
-      POSTGRES_USER: farmcrm
-      POSTGRES_PASSWORD: farmcrm_password
+      POSTGRES_USER:
+      POSTGRES_PASSWORD:
+      POSTGRES_DB:
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./shared/database:/docker-entrypoint-initdb.d
-    networks:
-      - farmcrm-network
 
-  # Backend (Spring Boot)
-  server:
+  backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: farmcrm-server
-    restart: unless-stopped
+      args:
+        MAVEN_OPTS: "-DskipTests"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - DATABASE_URL=jdbc:postgresql://database:5432/farmcrm
-      - DATABASE_USERNAME=farmcrm
-      - DATABASE_PASSWORD=farmcrm_password
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/
+      SPRING_DATASOURCE_USERNAME:
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_PROFILES_ACTIVE: prod
+      ADMIN_USERNAME: newuser
+      ADMIN_PASSWORD: newpassword
+    depends_on:
+      - postgresdb
     ports:
       - "8080:8080"
-    depends_on:
-      - database
-    volumes:
-      - ./server:/app
-    networks:
-      - farmcrm-network
 
-  # Frontend (для продакшена, в разработке используйте npm run dev:client)
-  client:
+  frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: farmcrm-client
-    restart: unless-stopped
-    environment:
-      - VITE_API_URL=http://localhost:8080
     ports:
       - "3000:3000"
-    volumes:
-      - ./client:/app
-      - /app/node_modules
-    networks:
-      - farmcrm-network
 
 volumes:
-  postgres_data:
-
-networks:
-  farmcrm-network:
-    driver: bridge
+  pgdata:

@@ -27,6 +27,7 @@ export function api(){
         (error) => {
             if (error.response && (error.response.status == 401 || error.response.status == 403)) {
                 navigateTo('');
+                console.log(error)
             }
             return Promise.reject(error);
         }

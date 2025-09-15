@@ -2,13 +2,12 @@ import { IconButton } from "../components/IconButton.js";
 import { Button } from "../components/Button.js"
 import { ErrorMessage } from "../components/ErrorMessage.js";
 import { navigateTo } from "../core/navigate.js";
-import { auth } from "../services/auth-service.js";
+import { auth, check } from "../services/auth-service.js";
 
 export async function Auth() {
 
-    if (localStorage.getItem("FARM_LOGIN") != null) {
-        navigateTo('/menu');
-    }
+    localStorage.removeItem("FARM_LOGIN");
+
     const div = document.createElement("div");
     div.className = 'auth-container';
 
