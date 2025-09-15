@@ -13,5 +13,5 @@ window.onerror = function(message, url, line, col, error) {
 };
 
 window.onunhandledrejection = function(event) {
-  showErrorPopup(`Неотловленная ошибка: ${event.reason}`);
+  showErrorPopup(`Ошибка: ${event.response ? event.response.message : event.reason}`);
 };
