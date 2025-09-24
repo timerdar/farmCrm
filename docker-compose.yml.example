@@ -13,6 +13,8 @@ services:
       - "5432:5432"
 
   backend:
+  	volumes:
+  		- ./logs:/app/logs
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -25,10 +27,12 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       ADMIN_USERNAME: newuser
       ADMIN_PASSWORD: newpassword
+      JWT_SECRET: J53wwJS6tKkv3wPXlbOhj32MWisMyIy1JOo0MAAJOmQZBvqujfBp1d2jN6mFp7v1wHTB9dQIakpSCXALfoei5OYI2cifEf6yDKKKanGc4Sgfoxe9MHeNIKj8tL1jfcokvebh3bKHa2rO1ruohwxYhIWdh65oUx24CPj7M84gDXp7zjJHtwWlxlGA7bE9nvJHucc2V0wBRL7OFaomsM5qeVGAlonIMCrA2yqE1iBqpMDYlOCUBFJIjutptnjRZaJ6
+      JWT_LIFETIME: 3600000
     depends_on:
       - postgresdb
     ports:
-      - "8080:8080"
+      - "8081:8080"
 
   frontend:
     build:
