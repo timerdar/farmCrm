@@ -5,7 +5,7 @@ import { navigateTo } from './navigate.js';
 export function api(){
 
     const config = {
-        baseURL: 'http://localhost:9090',
+        baseURL: 'http://localhost:1000',
         timeout: 7000,
         headers: {
             'Content-Type': 'application/json'
