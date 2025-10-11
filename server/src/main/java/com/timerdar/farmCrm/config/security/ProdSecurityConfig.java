@@ -65,7 +65,7 @@ public class ProdSecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://timerdar.ru", "http://192.168.31.85:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://timerdar.ru", "http://192.168.31.85:3000", "http://timerdar.ru:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
