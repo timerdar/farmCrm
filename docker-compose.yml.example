@@ -4,9 +4,9 @@ services:
   postgresdb:
     image: postgres:latest
     environment:
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-      POSTGRES_DB:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: farm
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -21,9 +21,9 @@ services:
       args:
         MAVEN_OPTS: "-DskipTests"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/
-      SPRING_DATASOURCE_USERNAME:
-      SPRING_DATASOURCE_PASSWORD:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/farm
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
       SPRING_PROFILES_ACTIVE: prod
       ADMIN_USERNAME: newuser
       ADMIN_PASSWORD: newpassword
@@ -32,7 +32,7 @@ services:
     depends_on:
       - postgresdb
     ports:
-      - "8081:8080"
+      - "8080:8080"
 
   frontend:
     build:
