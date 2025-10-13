@@ -7,7 +7,7 @@ export async function auth(login, password){
             password: password
         };
 
-        const response = await api().post('/auth/login', data);
+        const response = await api().post('/api/auth/login', data);
         return response;
     }catch (error) {
         console.log(error);
@@ -21,7 +21,7 @@ export async function check(token) {
             token: token
         };
 
-        const response = await api().post("/auth/check", data);
+        const response = await api().post("/api/auth/check", data);
         return response;
     }catch(error) {
         console.log(error);
