@@ -5,7 +5,7 @@ import { navigateTo } from './navigate.js';
 export function api(){
 
     const config = {
-        baseURL: 'http://localhost:8081',
+        baseURL: 'http://timerdar.ru:8081',
         timeout: 7000,
         headers: {
             'Content-Type': 'application/json'
