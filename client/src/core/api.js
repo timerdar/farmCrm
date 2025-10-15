@@ -9,7 +9,8 @@ export function api(){
         timeout: 7000,
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        withCredentials: false
     }
     const instanse = axios.create(config);
 
