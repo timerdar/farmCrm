@@ -30,6 +30,10 @@ public class ConsumerOrdersView extends VerticalLayout implements BeforeEnterObs
 		this.consumerService = consumerService;
 		this.orderService = orderService;
 
+		ordersGrid.isColumnReorderingAllowed();
+		ordersGrid.setEmptyStateComponent(new H1("ПУСТО"));
+
+		refreshOrders();
 		add(consumerInfo, ordersGrid);
 	}
 
