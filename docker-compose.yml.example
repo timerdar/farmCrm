@@ -35,12 +35,5 @@ services:
     ports:
       - "8081:8081"
 
-  frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-
 volumes:
   pgdata:
