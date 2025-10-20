@@ -25,15 +25,11 @@ public class ProductsView extends VerticalLayout {
 
 		productGrid.addColumn(ProductWithOrdersCount::getName).setHeader("Название").setAutoWidth(true);
 		productGrid.addColumn(ProductWithOrdersCount::getCost).setHeader("Цена").setAutoWidth(true);
-		productGrid.addColumn(new ComponentRenderer<>(productWithOrdersCount -> {
-			return new Text(productWithOrdersCount.isWeighed() ? "за КГ" : "за штуку");
-		})).setAutoWidth(true);
-
+		productGrid.addColumn(new ComponentRenderer<>(productWithOrdersCount -> new Text(productWithOrdersCount.isWeighed() ? "за КГ" : "за штуку"))).setAutoWidth(true);
 
 		productGrid.isColumnReorderingAllowed();
 		refreshGrid();
 		add(
-				new H1("Продукты"),
 				productGrid
 		);
 	}

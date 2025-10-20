@@ -14,7 +14,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 @Layout
-@Route("")
 public class MainView extends AppLayout {
 
 	public MainView() {
