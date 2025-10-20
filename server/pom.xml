@@ -103,7 +103,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
-            <version>24.7.0</version> <!-- смотря какую BOM версию выберешь -->
+            <version>24.8.0</version>
         </dependency>
 
 	</dependencies>
@@ -142,7 +142,7 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-bom</artifactId>
-                <version>24.7.0</version>  <!-- замените на последнюю стабильную -->
+                <version>24.8.0</version>  <!-- замените на последнюю стабильную -->
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
