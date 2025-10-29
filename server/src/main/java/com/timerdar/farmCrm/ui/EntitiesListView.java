@@ -82,12 +82,11 @@ public abstract class EntitiesListView extends VerticalLayout {
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setHeight("500px");
 		grid.addSelectionListener(e -> {
-			//TODO переделать
-			String className = this.getClassName();
-			if (className.startsWith("Product")) {
+			String[] className = getClass().getName().split("\\.");
+			if (className[className.length - 1].startsWith("Product")) {
 				UI.getCurrent().navigate(ProductOrdersView.class,
 						new RouteParameters("id", getEntityId(e.getFirstSelectedItem().get())));
-			} else if (className.startsWith("Consumer")) {
+			} else if (className[className.length - 1].startsWith("Consumer")) {
 				UI.getCurrent().navigate(ConsumerOrdersView.class,
 						new RouteParameters("id", getEntityId(e.getFirstSelectedItem().get())));
 
