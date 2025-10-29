@@ -3,6 +3,7 @@ package com.timerdar.farmCrm.ui.products;
 import com.timerdar.farmCrm.dto.CreateProductRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.model.Product;
+import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.service.ProductService;
 import com.timerdar.farmCrm.ui.EntitiesListView;
 import com.vaadin.flow.component.button.Button;
