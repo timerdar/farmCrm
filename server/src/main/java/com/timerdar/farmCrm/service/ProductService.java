@@ -1,6 +1,7 @@
 package com.timerdar.farmCrm.service;
 
 import com.timerdar.farmCrm.dto.CreateProductRequest;
+import com.timerdar.farmCrm.dto.ProductChangeRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.dto.ShortProductInfo;
 import com.timerdar.farmCrm.model.OrderStatus;
@@ -87,4 +88,10 @@ public class ProductService {
         log.info("Получение списка продуктов, которые находятся в доставке");
         return productRepository.getProductsListFromDelivery();
     }
+
+	@Transactional
+	public int updateProduct(ProductChangeRequest request){
+		log.info("Обновление данных продукта: req = {}", request);
+		return productRepository.updateProduct(request.getId(), request.getName(), request.getCost(), request.getCreatedCount());
+	}
 }
