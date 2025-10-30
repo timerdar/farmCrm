@@ -1,10 +1,12 @@
 package com.timerdar.farmCrm.ui.products;
 
+import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.timerdar.farmCrm.dto.ProductChangeRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.service.ProductService;
+import com.timerdar.farmCrm.ui.OrderComponent;
 import com.timerdar.farmCrm.ui.OrdersListView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -24,6 +26,7 @@ public class ProductOrdersView extends OrdersListView {
 
 	private final ProductService productService;
 	private final OrderService orderService;
+	private final OrderStatus orderStatus = OrderStatus.CREATED;
 
 	@Autowired
 	public ProductOrdersView(OrderService orderService, ProductService productService){
@@ -33,7 +36,7 @@ public class ProductOrdersView extends OrdersListView {
 	}
 
 	@Override
-	public List<?> getData() {
+	public List<OrderWithNameAndWeightable> getData() {
 		return orderService.getOrdersWithName(getEntityId(), "products", OrderStatus.CREATED.toString());
 	}
 
@@ -96,6 +99,11 @@ public class ProductOrdersView extends OrdersListView {
 		card.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
 		return card;
+	}
+
+	@Override
+	public Component getGridItem(OrderWithNameAndWeightable order) {
+		return new OrderComponent(order, orderService, orderStatus);
 	}
 
 }
