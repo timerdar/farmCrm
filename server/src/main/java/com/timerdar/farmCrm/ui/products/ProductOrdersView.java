@@ -6,7 +6,7 @@ import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.service.ProductService;
-import com.timerdar.farmCrm.ui.OrderComponent;
+import com.timerdar.farmCrm.ui.components.OrderComponent;
 import com.timerdar.farmCrm.ui.OrdersListView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -26,13 +26,11 @@ public class ProductOrdersView extends OrdersListView {
 
 	private final ProductService productService;
 	private final OrderService orderService;
-	private final OrderStatus orderStatus = OrderStatus.CREATED;
 
 	@Autowired
 	public ProductOrdersView(OrderService orderService, ProductService productService){
 		this.orderService = orderService;
 		this.productService = productService;
-
 	}
 
 	@Override

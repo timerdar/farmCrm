@@ -1,4 +1,4 @@
-package com.timerdar.farmCrm.ui;
+package com.timerdar.farmCrm.ui.components;
 
 import com.timerdar.farmCrm.dto.OrderChangeRequest;
 import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
@@ -49,7 +49,6 @@ public class OrderComponent extends HorizontalLayout {
 
 		setAlignItems(Alignment.CENTER);
 		setSpacing(true);
-		setWidth("520px");
 		setPadding(true);
 
 		nameLabel = new Span(name);

@@ -6,101 +6,102 @@ import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.service.OrderService;
+import com.timerdar.farmCrm.ui.components.OrderComponent;
+import com.timerdar.farmCrm.ui.OrdersListView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route("consumers/:id/orders")
-public class ConsumerOrdersView extends VerticalLayout implements BeforeEnterObserver {
+import java.util.List;
 
-	private final String SOURCE = "consumers";
+@Route("consumers/:id/orders")
+public class ConsumerOrdersView extends OrdersListView {
+
 
 	private final ConsumerService consumerService;
 	private final OrderService orderService;
-
-	private long consumerId;
-	private boolean isEditMode = true;
-
-	private final Grid<OrderWithNameAndWeightable> ordersGrid = new Grid<>();
 
 	@Autowired
 	public ConsumerOrdersView(ConsumerService consumerService, OrderService orderService){
 		this.consumerService = consumerService;
 		this.orderService = orderService;
-
-
-		ordersGrid.setEmptyStateComponent(new Div("Созданных заказов нет :("));
-
-		refreshOrders();
-		add(ordersGrid);
 	}
 
-	private void refreshOrders(){
-		ordersGrid.setItems(orderService.getOrdersWithName(consumerId, SOURCE, "CREATED"));
+	@Override
+	public List<OrderWithNameAndWeightable> getData() {
+		return orderService.getOrdersWithName(getEntityId(), "consumers", OrderStatus.CREATED.toString());
 	}
 
-	private void renderConsumer(){
-		Consumer consumer = consumerService.getConsumerById(consumerId);
+	@Override
+	public Component getEditableEntity(Long id) {
+		Consumer consumer = consumerService.getConsumerById(id);
 
 		FormLayout formLayout = new FormLayout();
 		TextField name = new TextField("Имя");
 		name.setValue(consumer.getName());
 		name.setReadOnly(true);
-		name.setValueChangeMode(ValueChangeMode.EAGER);
 
 		TextField address = new TextField("Адрес");
 		address.setValue(consumer.getAddress());
 		address.setReadOnly(true);
-		address.setValueChangeMode(ValueChangeMode.EAGER);
 
 		TextField phone = new TextField("Телефон");
 		phone.setValue(consumer.getPhone());
 		phone.setReadOnly(true);
-		phone.setValueChangeMode(ValueChangeMode.EAGER);
 
+		IntegerField totalSum = new IntegerField("Сумма выкупа");
+		totalSum.setValue(consumer.getTotalSum());
+		totalSum.setReadOnly(true);
 
-		//TODO добавить отмену изменений при кнопке
-		Button changeMode = new Button(new Icon(VaadinIcon.EDIT));
-		changeMode.addClickListener(e -> {
-			changeMode.setIcon(!isEditMode ? new Icon(VaadinIcon.EDIT) : new Icon(VaadinIcon.CHECK));
-			changeMode.addThemeVariants(!isEditMode ? ButtonVariant.LUMO_ICON : ButtonVariant.LUMO_SUCCESS);
+		Div buttons = new Div();
 
-			name.setReadOnly(!isEditMode);
-			phone.setReadOnly(!isEditMode);
-			address.setReadOnly(!isEditMode);
-
-			if(isEditMode)
-				consumerService.updateConsumer(
-						new ConsumerChangeRequest(
-								consumerId, name.getValue(), address.getValue(), phone.getValue()
-						)
-				);
-
-			isEditMode = !isEditMode;
+		Button changeMode = new Button(new Icon(VaadinIcon.EDIT), event -> {
+			name.setReadOnly(false);
+			phone.setReadOnly(false);
+			address.setReadOnly(false);
+			buttons.setVisible(true);
+			event.getSource().setVisible(false);
 		});
 
-		formLayout.addFormRow(name, address);
-		formLayout.addFormRow(phone, changeMode);
+		Button saveData = new Button(new Icon(VaadinIcon.CHECK), event -> {
+			consumerService.updateConsumer(
+					new ConsumerChangeRequest(id, name.getValue(), phone.getValue(), address.getValue()));
+			name.setReadOnly(true);
+			phone.setReadOnly(true);
+			address.setReadOnly(true);
+			buttons.setVisible(false);
+			changeMode.setVisible(true);
+		});
 
-		addComponentAsFirst(formLayout);
+		Button cancelUpdate = new Button(new Icon(VaadinIcon.CLOSE), event -> {
+			name.setReadOnly(true);
+			phone.setReadOnly(true);
+			address.setReadOnly(true);
+			buttons.setVisible(false);
+			changeMode.setVisible(true);
+		});
+
+		buttons.add(saveData, cancelUpdate);
+		buttons.setVisible(false);
+
+		formLayout.addFormRow(name, address,phone, totalSum);
+		formLayout.setRowSpacing("30px");
+		formLayout.add(buttons, changeMode);
+
+		formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+
+		return formLayout;
 	}
 
 	@Override
-	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-		this.consumerId = Long.parseLong(beforeEnterEvent.getRouteParameters().get("id").get());
-
-		renderConsumer();
-		refreshOrders();
+	public Component getGridItem(OrderWithNameAndWeightable order) {
+		return new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
 	}
 }
