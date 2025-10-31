@@ -76,8 +76,8 @@ public class OrderService {
 
     public Order changeStatus(OrderChangeRequest request){
         OrderStatus newStatus = OrderStatus.valueOf(request.getStatus());
-        Order order = orderRepository.getReferenceById(request.getId());
-        String oldStatus = order.getStatus().toString();
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		String oldStatus = order.getStatus().toString();
         if (request.getStatus().equals("ARCHIVED")){
             consumerService.increaseTotalSum(order.getConsumerId(), order.getCost());
         }
@@ -87,22 +87,22 @@ public class OrderService {
     }
 
     public Order changeAmount(OrderChangeRequest request){
-        Order order = orderRepository.getReferenceById(request.getId());
-        order.setCount(request.getAmount());
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		order.setCount(request.getAmount());
         log.info("Изменение количества в заказе: orderId = {}, newAmount = {}", request.getId(), request.getAmount());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order changeWeight(OrderChangeRequest request){
-        Order order = orderRepository.getReferenceById(request.getId());
-        order.setWeight(request.getWeight());
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		order.setWeight(request.getWeight());
         log.info("Изменение веса заказа: orderId = {}, newWeight = {}", request.getId(), request.getWeight());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order evalCost(long id){
-        Order order = orderRepository.getReferenceById(id);
-        Product product = productService.getProductById(order.getProductId());
+		Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		Product product = productService.getProductById(order.getProductId());
         int cost;
         if (product.isWeighed()){
             cost = (int) (product.getCost() * order.getWeight());
