@@ -19,7 +19,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 
 	private Long id;
 	private Grid<OrderWithNameAndWeightable> grid;
-	private Div placeholder = new Div();
+	private Component placeholder = new Div();
 
 	@Autowired
 	public OrdersListView(){
@@ -35,6 +35,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	public void renderEntity() {
 		Component entity = getEditableEntity(id);
 		replace(placeholder, entity);
+		placeholder = entity;
 	}
 
 	public Grid<OrderWithNameAndWeightable> getGrid(){

@@ -103,7 +103,7 @@ public class ProductOrdersView extends OrdersListView {
 
 	@Override
 	public Component getGridItem(OrderWithNameAndWeightable order) {
-		return new OrderComponent(order, orderService, orderStatus);
+		return new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
 	}
 
 }
