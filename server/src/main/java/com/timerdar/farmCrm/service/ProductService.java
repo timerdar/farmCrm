@@ -4,6 +4,7 @@ import com.timerdar.farmCrm.dto.CreateProductRequest;
 import com.timerdar.farmCrm.dto.ProductChangeRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.dto.ShortProductInfo;
+import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.ProductRepository;
@@ -92,6 +93,13 @@ public class ProductService {
 	@Transactional
 	public int updateProduct(ProductChangeRequest request){
 		log.info("Обновление данных продукта: req = {}", request);
-		return productRepository.updateProduct(request.getId(), request.getName(), request.getCost(), request.getCreatedCount());
+		int i = productRepository.updateProduct(request.getId(), request.getName(), request.getCost(), request.getCreatedCount());
+		for(Order order : orderService.getOrdersOfProduct(request.getId(), OrderStatus.CREATED)){
+			orderService.evalCost(order.getId());
+		}
+		for (Order order : orderService.getOrdersOfProduct(request.getId(), OrderStatus.DELIVERY)){
+			orderService.evalCost(order.getId());
+		}
+		return i;
 	}
 }
