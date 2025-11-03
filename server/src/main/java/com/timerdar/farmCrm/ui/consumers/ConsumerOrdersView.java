@@ -1,19 +1,27 @@
 package com.timerdar.farmCrm.ui.consumers;
 
 import com.timerdar.farmCrm.dto.ConsumerChangeRequest;
+import com.timerdar.farmCrm.dto.CreateOrderRequest;
 import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
+import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.OrderStatus;
+import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.service.OrderService;
+import com.timerdar.farmCrm.service.ProductService;
 import com.timerdar.farmCrm.ui.components.OrderComponent;
 import com.timerdar.farmCrm.ui.OrdersListView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.*;
@@ -27,11 +35,13 @@ public class ConsumerOrdersView extends OrdersListView {
 
 	private final ConsumerService consumerService;
 	private final OrderService orderService;
+	private final ProductService productService;
 
 	@Autowired
-	public ConsumerOrdersView(ConsumerService consumerService, OrderService orderService){
+	public ConsumerOrdersView(ConsumerService consumerService, OrderService orderService, ProductService productService){
 		this.consumerService = consumerService;
 		this.orderService = orderService;
+		this.productService = productService;
 	}
 
 	@Override
@@ -103,5 +113,47 @@ public class ConsumerOrdersView extends OrdersListView {
 	@Override
 	public Component getGridItem(OrderWithNameAndWeightable order) {
 		return new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
+	}
+
+	@Override
+	public Dialog getCreateOrderDialog() {
+		Consumer consumer = consumerService.getConsumerById(getEntityId());
+		Dialog dialog = new Dialog();
+
+		dialog.setHeaderTitle("Создать заказ");
+
+		VerticalLayout layout = new VerticalLayout();
+
+		ComboBox<ProductWithOrdersCount> productChooser = new ComboBox<>();
+		productChooser.setLabel("Продукт");
+		productChooser.setItemLabelGenerator(Product::getName);
+		productChooser.setItems(productService.getProductsList());
+		productChooser.setRequired(true);
+
+		IntegerField countField = new IntegerField("Количество");
+		countField.setMin(0);
+		countField.setPlaceholder("ШТ:");
+		countField.setRequired(true);
+
+		layout.add("Создание заказа для: " + consumer.getName() + " (" + consumer.getAddress() + ")");
+		layout.add(productChooser, countField);
+
+		dialog.add(layout);
+
+		Button cancelButton = new Button("Закрыть");
+		cancelButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+		cancelButton.addClickListener(e -> dialog.close());
+
+		Button saveButton = new Button("Создать");
+		saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+		saveButton.addClickListener(e -> {
+			CreateOrderRequest req = new CreateOrderRequest(productChooser.getValue().getId(), consumer.getId(), countField.getValue());
+			orderService.createOrder(req);
+			dialog.close();
+			refreshGrid();
+		});
+
+		dialog.getFooter().add(cancelButton, saveButton);
+		return dialog;
 	}
 }
