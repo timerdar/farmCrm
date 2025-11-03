@@ -22,7 +22,8 @@ public class OrderComponent extends HorizontalLayout {
 	private IntegerField countEditor; // Редактируемое поле количества
 	private Div weightDisplay;
 	private NumberField weightEditor;
-	private Button saveButton;          // Кнопка сохранения edit
+	private Button countSaveButton;          // Кнопка сохранения edit
+	private Button weightSaveButton;          // Кнопка сохранения edit
 	private final Span costLabel;
 
 	private long id;
@@ -57,10 +58,11 @@ public class OrderComponent extends HorizontalLayout {
 		costLabel = new Span(String.format("%d руб.", cost));
 		costLabel.setWidth("20%");
 
-		saveButton = new Button("Сохранить");
-		saveButton.setVisible(false);
+		countSaveButton = new Button("Сохранить");
+		countSaveButton.setVisible(false);
+		weightSaveButton = new Button("Сохранить");
+		weightSaveButton.setVisible(false);
 
-		// Отдельная кнопка для другого действия
 		Button actionButton;
 		if (status == OrderStatus.CREATED){
 			countDisplay = new Div();
@@ -76,7 +78,7 @@ public class OrderComponent extends HorizontalLayout {
 			countEditor.setWidth("20%");
 			countEditor.setVisible(false);
 
-			saveButton.addClickListener(e -> saveCount());
+			countSaveButton.addClickListener(e -> saveCount());
 
 			actionButton = new Button(new Icon(VaadinIcon.CART_O));
 			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "DELIVERY"));
@@ -96,15 +98,30 @@ public class OrderComponent extends HorizontalLayout {
 			Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener(e -> dialog.open());
 
-			add(dialog, nameLabel, countDisplay, countEditor, saveButton, actionButton, deleteButton);
+			add(dialog, nameLabel, countDisplay, countEditor, countSaveButton, actionButton, deleteButton);
 		}else {
 			add(nameLabel);
 			actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
 			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "CREATED"));
 
+			countDisplay = new Div();
+			countDisplay.setText(String.format("%d шт.", count));
+			countDisplay.getStyle().set("cursor", "pointer");
+			countDisplay.setWidth("20%");
+			countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
+
+			countEditor = new IntegerField();
+			countEditor.setPlaceholder("ШТ:");
+			countEditor.setMin(0);
+			countEditor.setValue(count);
+			countEditor.setWidth("20%");
+			countEditor.setVisible(false);
+
+			countSaveButton.addClickListener(e -> saveCount());
+
 			if(isWeighed){
 				weightDisplay = new Div();
-				weightDisplay.setText(String.format("%.2f кг", weight));
+				weightDisplay.setText(String.format("%.3f кг", weight));
 				weightDisplay.getStyle().set("cursor", "pointer");
 				weightDisplay.setWidth("20%");
 				weightDisplay.getElement().addEventListener("click", e -> enableEditingWeight());
@@ -116,33 +133,22 @@ public class OrderComponent extends HorizontalLayout {
 				weightEditor.setWidth("20%");
 				weightEditor.setVisible(false);
 
-				saveButton.addClickListener(e -> saveWeight());
-				add(weightDisplay, weightEditor, saveButton, actionButton);
+				weightSaveButton.addClickListener(e -> saveWeight());
+				add(countDisplay, countEditor, countSaveButton, weightDisplay, weightEditor, weightSaveButton, costLabel,	 actionButton);
 			}else{
-				countDisplay = new Div();
-				countDisplay.setText(String.format("%d шт.", count));
-				countDisplay.getStyle().set("cursor", "pointer");
-				countDisplay.setWidth("20%");
-				countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
-
-				countEditor = new IntegerField();
-				countEditor.setPlaceholder("ШТ:");
-				countEditor.setMin(0);
-				countEditor.setValue(count);
-				countEditor.setWidth("20%");
-				countEditor.setVisible(false);
-				add(countDisplay, countEditor, saveButton, costLabel, actionButton);
+				add(countDisplay, countEditor, countSaveButton, costLabel, actionButton);
 			}
 		}
 
-		saveButton.addClickListener(e -> updateMainEntity.run());
+		countSaveButton.addClickListener(e -> updateMainEntity.run());
+		weightSaveButton.addClickListener(e -> updateMainEntity.run());
 	}
 
 	private void enableEditingWeight(){
 		weightEditor.setValue(weight);
 		weightDisplay.setVisible(false);
 		weightEditor.setVisible(true);
-		saveButton.setVisible(true);
+		weightSaveButton.setVisible(true);
 	}
 
 	private void saveWeight(){
@@ -153,14 +159,14 @@ public class OrderComponent extends HorizontalLayout {
 		updateOrder(order);
 		weightDisplay.setVisible(true);
 		weightEditor.setVisible(false);
-		saveButton.setVisible(false);
+		weightSaveButton.setVisible(false);
 	}
 
 	private void enableEditingCount(){
 		countEditor.setValue(count);
 		countDisplay.setVisible(false);
 		countEditor.setVisible(true);
-		saveButton.setVisible(true);
+		countSaveButton.setVisible(true);
 	}
 
 	private void saveCount(){
@@ -171,7 +177,7 @@ public class OrderComponent extends HorizontalLayout {
 		updateOrder(order);
 		countDisplay.setVisible(true);
 		countEditor.setVisible(false);
-		saveButton.setVisible(false);
+		countSaveButton.setVisible(false);
 	}
 
 	private void updateOrder(Order order){
@@ -182,7 +188,7 @@ public class OrderComponent extends HorizontalLayout {
 		costLabel.setText(String.format("%d руб.", cost));
 		countDisplay.setText(String.format("%d шт.", count));
 		if (weightDisplay != null)
-			weightDisplay.setText(String.format("%2f кг.", weight));
+			weightDisplay.setText(String.format("%.3f кг.", weight));
 	}
 
 	private void changeStatusAction(Runnable updateGrid, Runnable updateMainEntity, String newStatus){
