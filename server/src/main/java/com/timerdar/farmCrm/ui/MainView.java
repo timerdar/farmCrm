@@ -4,24 +4,27 @@ import com.timerdar.farmCrm.ui.consumers.ConsumersView;
 import com.timerdar.farmCrm.ui.delivery.DeliveryView;
 import com.timerdar.farmCrm.ui.products.ProductsView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.router.Layout;
-import com.vaadin.flow.router.Route;
-
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.*;
 
 @Layout
-public class MainView extends AppLayout {
+public class MainView extends AppLayout implements AfterNavigationObserver {
+
+	private final Tabs tabs;
+	private final Tab consumers;
+	private final Tab products;
+	private final Tab delivery;
 
 	public MainView() {
-		Tabs tabs = new Tabs(
-				createTab("Заказчики", ConsumersView.class),
-				createTab("Продукция", ProductsView.class),
-				createTab("Доставка", DeliveryView.class)
-		);
+		consumers = createTab("Заказчики", ConsumersView.class);
+		products = createTab("Продукция", ProductsView.class);
+		delivery = createTab("Доставка", DeliveryView.class);
+
+		tabs = new Tabs(consumers, products, delivery);
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 		addToNavbar(tabs);
 	}
@@ -30,5 +33,18 @@ public class MainView extends AppLayout {
 	private Tab createTab(String text, Class<? extends Component> target){
 		RouterLink link = new RouterLink(text, target);
 		return new Tab(link);
+	}
+
+	@Override
+	public void afterNavigation(AfterNavigationEvent event) {
+		String route = event.getLocation().getFirstSegment();
+
+		if (route.startsWith("delivery")) {
+			tabs.setSelectedTab(delivery);
+		} else if (route.startsWith("products")) {
+			tabs.setSelectedTab(products);
+		} else {
+			tabs.setSelectedTab(consumers);
+		}
 	}
 }
