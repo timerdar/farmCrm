@@ -154,7 +154,31 @@ public class OrderService {
                     product.getCreatedCount(),
                     getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE)));
         }
+		log.info("Получение сводки доставки");
         return res;
     }
 
+	public String getBills(){
+		StringBuilder sb = new StringBuilder();
+		for (ConsumerWithOrders consumer : getDeliveryData()){
+			sb.append(consumer.getName()).append("\n");
+			sb.append(consumer.getPhone()).append("\n");
+			sb.append(consumer.getAddress()).append("\n");
+
+			StringBuilder ordersSb = new StringBuilder();
+			int s = 0;
+			for (OrderWithNameAndWeightable order: consumer.getOrders()){
+				s = s + order.getCost();
+				ordersSb.append(order.getName()).append(" ");
+				if(order.isWeighed())
+					ordersSb.append(order.getWeight()).append(" кг ");
+				ordersSb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
+			}
+			sb.append("Сумма заказа: ").append(s).append("\n");
+			sb.append(ordersSb);
+			sb.append("\n");
+		}
+		log.info("Получены чеки доставки");
+		return sb.toString();
+	}
 }
