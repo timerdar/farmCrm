@@ -6,6 +6,7 @@ import com.vaadin.flow.router.Route;
 
 @Route("auth")
 public class AuthView extends  VerticalLayout{
+	//TODO добавить аутентификацию и проверку запросов
 	public AuthView(){
 		add(new LoginForm());
 	}

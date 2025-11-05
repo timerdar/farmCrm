@@ -48,6 +48,7 @@ public class DeliveryView extends VerticalLayout {
 		grid.setEmptyStateComponent(new Div("Записи не найдены :("));
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setSelectionMode(Grid.SelectionMode.NONE);
+		grid.setHeight("500px");
 
 		grid.addColumn(new ComponentRenderer<>(this::getGridItem));
 
@@ -105,4 +106,6 @@ public class DeliveryView extends VerticalLayout {
 
 		summaryDialog.getFooter().add(new Button("Закрыть", e -> summaryDialog.close()));
 	}
+
+	//TODO добавить кнопку очистки доставки
 }

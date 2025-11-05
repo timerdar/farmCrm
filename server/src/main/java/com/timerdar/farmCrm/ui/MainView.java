@@ -12,7 +12,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
 
 @Layout
-public class MainView extends AppLayout implements AfterNavigationObserver {
+public class MainView extends AppLayout implements AfterNavigationObserver, BeforeEnterObserver {
 
 	private final Tabs tabs;
 	private final Tab consumers;
@@ -46,5 +46,10 @@ public class MainView extends AppLayout implements AfterNavigationObserver {
 		} else {
 			tabs.setSelectedTab(consumers);
 		}
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+		//TODO добавить проверку корркетности токена
 	}
 }
