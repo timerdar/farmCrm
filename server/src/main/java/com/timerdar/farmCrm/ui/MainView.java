@@ -6,12 +6,14 @@ import com.timerdar.farmCrm.ui.products.ProductsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
 
 @Layout
+@CssImport("./styles/timerdar.css")
 public class MainView extends AppLayout implements AfterNavigationObserver, BeforeEnterObserver {
 
 	private final Tabs tabs;
@@ -27,6 +29,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		tabs = new Tabs(consumers, products, delivery);
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 		addToNavbar(tabs);
+
 	}
 
 
