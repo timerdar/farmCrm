@@ -9,6 +9,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -32,23 +34,25 @@ public class DeliveryView extends VerticalLayout {
 	public DeliveryView(OrderService orderService){
 		this.orderService = orderService;
 
-
+		setAlignItems(Alignment.CENTER);
+		setSpacing(false);
 
 		grid = getGrid();
-		Button b = getSummaryButton();
 		Button copy = getBillCopyButton();
+		Button b = getSummaryButton();
+		Button clean = getCleanButton();
+		setHeightFull();
 
 		refreshGrid();
-		add(summaryDialog, copy, b, grid);
-		setPadding(false);
+		add(summaryDialog, copy, b, clean, grid);
 	}
 
 	private Grid<ConsumerWithOrders> getGrid(){
 		Grid<ConsumerWithOrders> grid = new Grid<>();
 		grid.setEmptyStateComponent(new Div("Записи не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
+		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		grid.setSelectionMode(Grid.SelectionMode.NONE);
-		grid.setHeight("500px");
+		grid.setHeightFull();
 
 		grid.addColumn(new ComponentRenderer<>(this::getGridItem));
 
@@ -69,7 +73,8 @@ public class DeliveryView extends VerticalLayout {
 
 	private Button getBillCopyButton(){
 		Button button = new Button("Скопировать чеки доставки");
-
+		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		button.setWidthFull();
 		button.addClickListener(e -> {
 			UI.getCurrent().getPage().executeJs(
 					"navigator.clipboard.writeText($0).then(() => console.log('Copied!'));",
@@ -82,13 +87,14 @@ public class DeliveryView extends VerticalLayout {
 
 	private Button getSummaryButton(){
 		Button button = new Button("Сводка по продукции");
+		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		button.setWidthFull();
 		button.addClickListener(e -> {
 			renderSummaryDialog();
 			summaryDialog.open();
 		});
 		return button;
 	}
-
 
 	private void renderSummaryDialog(){
 		summaryDialog.setHeaderTitle("Сводка по заказанным продукциям");
@@ -107,5 +113,24 @@ public class DeliveryView extends VerticalLayout {
 		summaryDialog.getFooter().add(new Button("Закрыть", e -> summaryDialog.close()));
 	}
 
-	//TODO добавить кнопку очистки доставки
+	private Button getCleanButton(){
+		ConfirmDialog confirm = new ConfirmDialog();
+		confirm.setHeader("Внимание!");
+		confirm.setText("Вы уверены, что хотите выполнить очистку всех заказов в доставке? Все заказы перенесутся в архив");
+		confirm.setCancelable(true);
+		confirm.setCancelText("Отмена");
+		confirm.setConfirmText("Очистить");
+		confirm.setConfirmButtonTheme("error");
+		confirm.addConfirmListener(e -> {
+				orderService.clearDelivery();
+				refreshGrid();
+		});
+
+		Button button = new Button("Очистить доставку");
+		button.addThemeVariants(ButtonVariant.LUMO_ERROR);
+		button.addClickListener(e -> confirm.open());
+		button.setWidthFull();
+
+		return button;
+	}
 }
