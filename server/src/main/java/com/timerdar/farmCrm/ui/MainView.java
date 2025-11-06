@@ -1,5 +1,7 @@
 package com.timerdar.farmCrm.ui;
 
+import com.timerdar.farmCrm.dto.TokenValidationRequest;
+import com.timerdar.farmCrm.service.AuthService;
 import com.timerdar.farmCrm.ui.consumers.ConsumersView;
 import com.timerdar.farmCrm.ui.delivery.DeliveryView;
 import com.timerdar.farmCrm.ui.products.ProductsView;
@@ -11,6 +13,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Layout
 @CssImport("./styles/timerdar.css")
@@ -21,7 +25,11 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 	private final Tab products;
 	private final Tab delivery;
 
-	public MainView() {
+	private AuthService authService;
+
+	@Autowired
+	public MainView(AuthService authService) {
+		this.authService = authService;
 		consumers = createTab("Заказчики", ConsumersView.class);
 		products = createTab("Продукция", ProductsView.class);
 		delivery = createTab("Доставка", DeliveryView.class);
@@ -53,6 +61,17 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-		//TODO добавить проверку корркетности токена
+		String jwt = null;
+		if (getUI().isPresent()) {
+			Object obj = getUI().get().getSession().getAttribute("jwt");
+			if (obj instanceof String) {
+				jwt = (String) obj;
+			}
+		}
+
+		if (jwt == null || !authService.authByToken(new TokenValidationRequest(jwt, ""))) {
+			// нет токена или он невалидный — редирект на логин
+			beforeEnterEvent.rerouteTo("login");
+		}
 	}
 }
