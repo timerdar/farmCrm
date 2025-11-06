@@ -21,6 +21,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -57,18 +58,22 @@ public class ConsumerOrdersView extends OrdersListView {
 		TextField name = new TextField("Имя");
 		name.setValue(consumer.getName());
 		name.setReadOnly(true);
+		name.setWidthFull();
 
 		TextField address = new TextField("Адрес");
 		address.setValue(consumer.getAddress());
 		address.setReadOnly(true);
+		address.setWidthFull();
 
 		TextField phone = new TextField("Телефон");
 		phone.setValue(consumer.getPhone());
 		phone.setReadOnly(true);
+		phone.setWidthFull();
 
 		IntegerField totalSum = new IntegerField("Сумма выкупа");
 		totalSum.setValue(consumer.getTotalSum());
 		totalSum.setReadOnly(true);
+		totalSum.setWidthFull();
 
 		Div buttons = new Div();
 
@@ -102,7 +107,6 @@ public class ConsumerOrdersView extends OrdersListView {
 		buttons.setVisible(false);
 
 		formLayout.addFormRow(name, address,phone, totalSum);
-		formLayout.setRowSpacing("30px");
 		formLayout.add(buttons, changeMode);
 
 		formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
@@ -147,10 +151,17 @@ public class ConsumerOrdersView extends OrdersListView {
 		Button saveButton = new Button("Создать");
 		saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
-			CreateOrderRequest req = new CreateOrderRequest(productChooser.getValue().getId(), consumer.getId(), countField.getValue());
-			orderService.createOrder(req);
-			dialog.close();
-			refreshGrid();
+			if (productChooser.isEmpty() || countField.isEmpty()){
+				Notification.show("Заполните все поля");
+			}else{
+				CreateOrderRequest req = new CreateOrderRequest(productChooser.getValue().getId(), consumer.getId(), countField.getValue());
+				orderService.createOrder(req);
+				dialog.close();
+				productChooser.clear();
+				countField.clear();
+				refreshGrid();
+			}
+
 		});
 
 		dialog.getFooter().add(cancelButton, saveButton);

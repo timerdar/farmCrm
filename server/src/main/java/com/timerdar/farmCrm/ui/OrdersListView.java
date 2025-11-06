@@ -4,6 +4,7 @@ import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -31,6 +32,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		createOrder = new Dialog();
 		createOrderButton = createOrderButton();
 
+		setHeightFull();
 		add(createOrder, placeholder, createOrderButton, grid);
 	}
 
@@ -48,8 +50,8 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	public Grid<OrderWithNameAndWeightable> getGrid(){
 		Grid<OrderWithNameAndWeightable> grid = new Grid<>();
 		grid.setEmptyStateComponent(new Div("Заказы не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-		grid.setHeight("500px");
+		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		grid.setHeightFull();
 		grid.setSelectionMode(Grid.SelectionMode.NONE);
 
 		grid.addColumn(new ComponentRenderer<>(this::getGridItem));
@@ -85,6 +87,8 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	public Button createOrderButton(){
 		Button button = new Button();
 		button.setText("Создать заказ");
+		button.setWidthFull();
+		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		return button;
 	}
 

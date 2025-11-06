@@ -21,6 +21,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -57,19 +58,23 @@ public class ProductOrdersView extends OrdersListView {
 		TextField name = new TextField("Название");
 		name.setValue(product.getName());
 		name.setReadOnly(true);
+		name.setWidthFull();
 
 		NumberField cost = new NumberField("Цена");
 		cost.setValue((double) product.getCost());
 		cost.setReadOnly(true);
+		cost.setWidthFull();
 
 		NumberField createdCount = new NumberField("Изготовлено");
 		createdCount.setValue((double) product.getCreatedCount());
 		createdCount.setReadOnly(true);
+		createdCount.setStep(1);
+		createdCount.setWidthFull();
 
 		NumberField orderedCount = new NumberField("Заказано");
 		orderedCount.setValue((double) product.getOrderedCount());
 		orderedCount.setReadOnly(true);
-		orderedCount.setStep(1);
+		orderedCount.setWidthFull();
 
 		Div buttons = new Div();
 
@@ -101,11 +106,15 @@ public class ProductOrdersView extends OrdersListView {
 		buttons.add(saveData, cancelData);
 		buttons.setVisible(false);
 
-		card.addFormRow(name, cost, createdCount, orderedCount);
+		card.add(name, 3);
+		card.add(cost, createdCount, orderedCount);
 		card.setRowSpacing("30px");
 		card.add(buttons, edit);
 
-		card.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+		card.setResponsiveSteps(
+				new FormLayout.ResponsiveStep("0", 1),
+				new FormLayout.ResponsiveStep("250px", 3)
+		);
 
 		return card;
 	}
@@ -123,17 +132,20 @@ public class ProductOrdersView extends OrdersListView {
 		dialog.setHeaderTitle("Создание заказа");
 
 		VerticalLayout layout = new VerticalLayout();
+		layout.setPadding(false);
 
 		ComboBox<Consumer> consumerChooser = new ComboBox<>();
 		consumerChooser.setRequired(true);
 		consumerChooser.setItemLabelGenerator(Consumer::getName);
 		consumerChooser.setItems(consumerService.getAllConsumers());
 		consumerChooser.setLabel("Заказчик");
+		consumerChooser.setWidthFull();
 
 		IntegerField count = new IntegerField("Количество");
 		count.setMin(0);
 		count.setRequired(true);
 		count.setPlaceholder("ШТ:");
+		count.setWidthFull();
 
 		layout.add("Создание заказа для продукта " + product.getName());
 		layout.add(consumerChooser, count);
@@ -147,10 +159,16 @@ public class ProductOrdersView extends OrdersListView {
 		Button saveButton = new Button("Создать");
 		saveButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
-			CreateOrderRequest req = new CreateOrderRequest(product.getId(), consumerChooser.getValue().getId(), count.getValue());
-			orderService.createOrder(req);
-			dialog.close();
-			refreshGrid();
+			if(consumerChooser.isEmpty() || count.isEmpty()){
+				Notification.show("Заполните все поля");
+			}else{
+				CreateOrderRequest req = new CreateOrderRequest(product.getId(), consumerChooser.getValue().getId(), count.getValue());
+				orderService.createOrder(req);
+				dialog.close();
+				consumerChooser.clear();
+				count.clear();
+				refreshGrid();
+			}
 		});
 
 		dialog.getFooter().add(cancelButton, saveButton);
