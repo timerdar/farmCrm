@@ -109,6 +109,7 @@ public class ConsumerOrdersView extends OrdersListView {
 		formLayout.addFormRow(name, address,phone, totalSum);
 		formLayout.add(buttons, changeMode);
 
+		//TODO обновить на несколько столбцов
 		formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
 		return formLayout;

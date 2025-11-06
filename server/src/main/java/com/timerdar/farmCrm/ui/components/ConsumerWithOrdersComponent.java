@@ -21,8 +21,6 @@ import java.util.Map;
 
 public class ConsumerWithOrdersComponent extends Details {
 
-	//TODO сделать обновление списка заказов при переводе заказа в CREATED
-
 	private OrderService orderService;
 
 	private ConsumerWithOrders consumer;
