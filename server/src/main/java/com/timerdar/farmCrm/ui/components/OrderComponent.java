@@ -6,6 +6,7 @@ import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -36,7 +37,13 @@ public class OrderComponent extends HorizontalLayout {
 
 	private final OrderService orderService;
 
+	private Runnable updateMainEntity;
+	private Runnable updateGrid;
+
 	public OrderComponent(OrderWithNameAndWeightable order, OrderService orderService, Runnable updateMainEntity, Runnable updateGrid){
+		this.updateMainEntity = updateMainEntity;
+		this.updateGrid = updateGrid;
+
 		this.id = order.getId();
 		this.isWeighed = order.isWeighed();
 		this.weight = order.getWeight();
@@ -49,8 +56,7 @@ public class OrderComponent extends HorizontalLayout {
 		this.orderService = orderService;
 
 		setAlignItems(Alignment.CENTER);
-		setSpacing(true);
-		setPadding(true);
+		setPadding(false);
 
 		nameLabel = new Span(name);
 		nameLabel.setWidth("30%");
@@ -79,7 +85,6 @@ public class OrderComponent extends HorizontalLayout {
 			countEditor.setVisible(false);
 
 			countSaveButton.addClickListener(e -> saveCount());
-
 			actionButton = new Button(new Icon(VaadinIcon.CART_O));
 			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "DELIVERY"));
 
@@ -102,7 +107,10 @@ public class OrderComponent extends HorizontalLayout {
 		}else {
 			add(nameLabel);
 			actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
-			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "CREATED"));
+			actionButton.addClickListener(e -> {
+				changeStatusAction(updateGrid, updateMainEntity, "CREATED");
+				this.removeFromParent();
+			});
 
 			countDisplay = new Div();
 			countDisplay.setText(String.format("%d шт.", count));
@@ -117,8 +125,15 @@ public class OrderComponent extends HorizontalLayout {
 			countEditor.setWidth("20%");
 			countEditor.setVisible(false);
 
-			countSaveButton.addClickListener(e -> saveCount());
+			Checkbox done = new Checkbox();
+			done.setValue(status == OrderStatus.DONE);
+			this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
+			done.addClickListener(e -> {
+				changeStatusAction(updateGrid, updateMainEntity, done.getValue() ? "DONE" : "DELIVERY");
+				this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
+			});
 
+			countSaveButton.addClickListener(e -> saveCount());
 			if(isWeighed){
 				weightDisplay = new Div();
 				weightDisplay.setText(String.format("%.3f кг", weight));
@@ -134,9 +149,9 @@ public class OrderComponent extends HorizontalLayout {
 				weightEditor.setVisible(false);
 
 				weightSaveButton.addClickListener(e -> saveWeight());
-				add(countDisplay, countEditor, countSaveButton, weightDisplay, weightEditor, weightSaveButton, costLabel,	 actionButton);
+				add(countDisplay, countEditor, countSaveButton, weightDisplay, weightEditor, weightSaveButton, costLabel, done, actionButton);
 			}else{
-				add(countDisplay, countEditor, countSaveButton, costLabel, actionButton);
+				add(countDisplay, countEditor, countSaveButton, costLabel, done, actionButton);
 			}
 		}
 
@@ -189,6 +204,7 @@ public class OrderComponent extends HorizontalLayout {
 		countDisplay.setText(String.format("%d шт.", count));
 		if (weightDisplay != null)
 			weightDisplay.setText(String.format("%.3f кг.", weight));
+		updateMainEntity.run();
 	}
 
 	private void changeStatusAction(Runnable updateGrid, Runnable updateMainEntity, String newStatus){

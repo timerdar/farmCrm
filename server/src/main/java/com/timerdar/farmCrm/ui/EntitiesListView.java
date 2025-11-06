@@ -38,6 +38,8 @@ public abstract class EntitiesListView extends VerticalLayout {
 		creationButton = getCreationButon(creationDialog);
 		grid = getGrid();
 
+		setHeightFull();
+
 		add(search, creationDialog, creationButton, grid);
 	}
 
@@ -70,7 +72,7 @@ public abstract class EntitiesListView extends VerticalLayout {
 
 		search.add(new Icon(VaadinIcon.SEARCH));
 		search.add(searchField);
-		search.setWidth("50%");
+		search.setWidthFull();
 		search.setAlignItems(Alignment.CENTER);
 
 		return search;
@@ -79,8 +81,8 @@ public abstract class EntitiesListView extends VerticalLayout {
 	private Grid<Object> getGrid(){
 		Grid<Object> grid = new Grid<>();
 		grid.setEmptyStateComponent(new Div("Записи не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
-		grid.setHeight("500px");
+		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		grid.setHeightFull();
 		grid.addSelectionListener(e -> {
 			String[] className = getClass().getName().split("\\.");
 			if (className[className.length - 1].startsWith("Product")) {
