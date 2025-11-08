@@ -32,10 +32,10 @@ import java.util.List;
 @Route(value = "delivery", layout = MainView.class)
 public class DeliveryView extends VerticalLayout {
 
-	private Grid<ConsumerWithOrders> grid;
-	private Dialog summaryDialog = new Dialog();
-	private OrderService orderService;
-	private ConsumerService consumerService;
+	private final Grid<ConsumerWithOrders> grid;
+	private final Dialog summaryDialog = new Dialog();
+	private final OrderService orderService;
+	private final ConsumerService consumerService;
 
 	private ConsumerWithOrders draggedItem;
 
@@ -86,12 +86,11 @@ public class DeliveryView extends VerticalLayout {
 		Button button = new Button("Скопировать чеки доставки");
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setWidthFull();
-		button.addClickListener(e -> {
+		button.addClickListener(e ->
 			UI.getCurrent().getPage().executeJs(
 					"navigator.clipboard.writeText($0).then(() => console.log('Copied!'));",
-					orderService.getBills());
-
-		});
+					orderService.getBills())
+		);
 		button.addClickListener(e -> Notification.show("Чеки скопированы в буфер обмена"));
 		return button;
 	}
@@ -195,9 +194,9 @@ public class DeliveryView extends VerticalLayout {
 
 		reorderDialog.add(dialogLayout);
 
-		Button close = new Button("Отмена", e -> {
-			reorderDialog.close();
-		});
+		Button close = new Button("Отмена", e ->
+			reorderDialog.close()
+		);
 		close.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
 		Button accept = new Button("Сохранить", e -> {
