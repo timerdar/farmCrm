@@ -76,8 +76,8 @@ public class OrderService {
 
     public Order changeStatus(OrderChangeRequest request){
         OrderStatus newStatus = OrderStatus.valueOf(request.getStatus());
-        Order order = orderRepository.getReferenceById(request.getId());
-        String oldStatus = order.getStatus().toString();
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		String oldStatus = order.getStatus().toString();
         if (request.getStatus().equals("ARCHIVED")){
             consumerService.increaseTotalSum(order.getConsumerId(), order.getCost());
         }
@@ -87,22 +87,22 @@ public class OrderService {
     }
 
     public Order changeAmount(OrderChangeRequest request){
-        Order order = orderRepository.getReferenceById(request.getId());
-        order.setCount(request.getAmount());
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		order.setCount(request.getAmount());
         log.info("Изменение количества в заказе: orderId = {}, newAmount = {}", request.getId(), request.getAmount());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order changeWeight(OrderChangeRequest request){
-        Order order = orderRepository.getReferenceById(request.getId());
-        order.setWeight(request.getWeight());
+		Order order = orderRepository.findById(request.getId()).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		order.setWeight(request.getWeight());
         log.info("Изменение веса заказа: orderId = {}, newWeight = {}", request.getId(), request.getWeight());
         return evalCost(orderRepository.save(order).getId());
     }
 
     public Order evalCost(long id){
-        Order order = orderRepository.getReferenceById(id);
-        Product product = productService.getProductById(order.getProductId());
+		Order order = orderRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Order not found"));
+		Product product = productService.getProductById(order.getProductId());
         int cost;
         if (product.isWeighed()){
             cost = (int) (product.getCost() * order.getWeight());
@@ -154,7 +154,31 @@ public class OrderService {
                     product.getCreatedCount(),
                     getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE)));
         }
+		log.info("Получение сводки доставки");
         return res;
     }
 
+	public String getBills(){
+		StringBuilder sb = new StringBuilder();
+		for (ConsumerWithOrders consumer : getDeliveryData()){
+			sb.append(consumer.getName()).append("\n");
+			sb.append(consumer.getPhone()).append("\n");
+			sb.append(consumer.getAddress()).append("\n");
+
+			StringBuilder ordersSb = new StringBuilder();
+			int s = 0;
+			for (OrderWithNameAndWeightable order: consumer.getOrders()){
+				s = s + order.getCost();
+				ordersSb.append(order.getName()).append(" ");
+				if(order.isWeighed())
+					ordersSb.append(order.getWeight()).append(" кг ");
+				ordersSb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
+			}
+			sb.append("Сумма заказа: ").append(s).append("\n");
+			sb.append(ordersSb);
+			sb.append("\n");
+		}
+		log.info("Получены чеки доставки");
+		return sb.toString();
+	}
 }
