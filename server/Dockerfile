@@ -7,8 +7,8 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# Собираем jar-файл
-RUN mvn clean package -DskipTests
+# Собираем jar-файл и запускаем prepare-frontend Vaadin
+RUN mvn clean vaadin:prepare-frontend package -DskipTests
 
 # Этап 2: Запуск из легковесного образа
 FROM eclipse-temurin:17-jdk
@@ -18,6 +18,6 @@ WORKDIR /app
 # Копируем собранный jar с предыдущего этапа
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 9080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
