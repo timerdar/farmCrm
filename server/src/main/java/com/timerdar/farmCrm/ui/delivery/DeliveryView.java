@@ -82,6 +82,7 @@ public class DeliveryView extends VerticalLayout {
 		return orderService.getDeliveryData();
 	}
 
+	//TODO фикс кнопки копирования на айфоне
 	private Button getBillCopyButton(){
 		Button button = new Button("Скопировать чеки доставки");
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
