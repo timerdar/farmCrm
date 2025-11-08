@@ -30,6 +30,9 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 	@Autowired
 	public MainView(AuthService authService) {
 		this.authService = authService;
+
+		getLocalStorageToken();
+
 		consumers = createTab("Заказчики", ConsumersView.class);
 		products = createTab("Продукция", ProductsView.class);
 		delivery = createTab("Доставка", DeliveryView.class);
@@ -38,6 +41,14 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 		addToNavbar(tabs);
 
+	}
+
+	private void getLocalStorageToken(){
+		UI.getCurrent().getPage().executeJs("return window.localStorage.getItem('AUTH_JWT');").then(String.class, token -> {
+			if (token != null) {
+				UI.getCurrent().getSession().setAttribute("jwt", token);
+			}
+		});
 	}
 
 
@@ -58,19 +69,10 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 			tabs.setSelectedTab(consumers);
 		}
 	}
-
 	@Override
 	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-		String jwt = null;
-		if (getUI().isPresent()) {
-			Object obj = getUI().get().getSession().getAttribute("jwt");
-			if (obj instanceof String) {
-				jwt = (String) obj;
-			}
-		}
-
+		String jwt = (String) UI.getCurrent().getSession().getAttribute("jwt");
 		if (jwt == null || !authService.authByToken(new TokenValidationRequest(jwt, ""))) {
-			// нет токена или он невалидный — редирект на логин
 			beforeEnterEvent.rerouteTo("login");
 		}
 	}
