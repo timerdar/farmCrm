@@ -42,11 +42,6 @@ public class ProdSecurityConfig {
         return http
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                /*.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/auth/registrate-admin").denyAll()
-                    .anyRequest().authenticated()
-                )*/
 				.authorizeHttpRequests(auth -> auth
 						.anyRequest().permitAll())
                 .sessionManagement(session -> session

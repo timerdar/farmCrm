@@ -1,7 +1,9 @@
 package com.timerdar.farmCrm.ui.delivery;
 
 import com.timerdar.farmCrm.dto.ConsumerWithOrders;
+import com.timerdar.farmCrm.dto.DeliveryOrderNumForConsumer;
 import com.timerdar.farmCrm.dto.DeliverySummaryItem;
+import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.ui.MainView;
 import com.timerdar.farmCrm.ui.components.ConsumerWithOrdersComponent;
@@ -14,6 +16,9 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.grid.dnd.GridDropLocation;
+import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -21,6 +26,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Route(value = "delivery", layout = MainView.class)
@@ -29,10 +35,14 @@ public class DeliveryView extends VerticalLayout {
 	private Grid<ConsumerWithOrders> grid;
 	private Dialog summaryDialog = new Dialog();
 	private OrderService orderService;
+	private ConsumerService consumerService;
+
+	private ConsumerWithOrders draggedItem;
 
 	@Autowired
-	public DeliveryView(OrderService orderService){
+	public DeliveryView(OrderService orderService, ConsumerService consumerService){
 		this.orderService = orderService;
+		this.consumerService = consumerService;
 
 		setAlignItems(Alignment.CENTER);
 		setSpacing(false);
@@ -41,10 +51,11 @@ public class DeliveryView extends VerticalLayout {
 		Button copy = getBillCopyButton();
 		Button b = getSummaryButton();
 		Button clean = getCleanButton();
+		Button reorder = getReorderConsumersButton();
 		setHeightFull();
 
 		refreshGrid();
-		add(summaryDialog, copy, b, clean, grid);
+		add(summaryDialog, copy, b, clean, reorder, grid);
 	}
 
 	private Grid<ConsumerWithOrders> getGrid(){
@@ -59,16 +70,16 @@ public class DeliveryView extends VerticalLayout {
 		return grid;
 	}
 
-	private List<ConsumerWithOrders> getData(){
-		return orderService.getDeliveryData();
+	private Component getGridItem(ConsumerWithOrders consumerWithOrders){
+		return new ConsumerWithOrdersComponent(consumerWithOrders, this.orderService);
 	}
 
 	private void refreshGrid(){
 		grid.setItems(getData());
 	}
 
-	private Component getGridItem(ConsumerWithOrders consumerWithOrders){
-		return new ConsumerWithOrdersComponent(consumerWithOrders, this.orderService);
+	private List<ConsumerWithOrders> getData(){
+		return orderService.getDeliveryData();
 	}
 
 	private Button getBillCopyButton(){
@@ -132,5 +143,80 @@ public class DeliveryView extends VerticalLayout {
 		button.setWidthFull();
 
 		return button;
+	}
+
+	private Button getReorderConsumersButton(){
+		Button button = new Button("Поменять порядок доставки");
+		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		button.setWidthFull();
+
+		Dialog reorderDialog = new Dialog("Изменение порядка доставки");
+
+		button.addClickListener(e -> reorderDialog.open());
+
+		VerticalLayout dialogLayout = new VerticalLayout();
+		dialogLayout.add(new Div("Для изменения порядка зажмите строчку с заказчиком и перенесите в нужное место"));
+
+		List<ConsumerWithOrders> data = getData();
+		Grid<ConsumerWithOrders> reorderGrid = new Grid<>();
+		GridListDataView<ConsumerWithOrders> dataView = reorderGrid.setItems(data);
+		reorderGrid.setRowsDraggable(true);
+		reorderGrid.addColumn(this::getReorderGridItem);
+
+		reorderGrid.addDragStartListener(e -> {
+			draggedItem = e.getDraggedItems().get(0);
+			reorderGrid.setDropMode(GridDropMode.BETWEEN);
+		});
+
+		reorderGrid.addDropListener(e -> {
+			ConsumerWithOrders targetConsumer = e.getDropTargetItem().orElse(null);
+			GridDropLocation dropLocation = e.getDropLocation();
+
+			boolean droppedOntoItself = draggedItem.equals(targetConsumer);
+
+			if(targetConsumer == null || droppedOntoItself) return;
+
+			dataView.removeItem(draggedItem);
+
+			if(dropLocation == GridDropLocation.BELOW){
+				dataView.addItemAfter(draggedItem, targetConsumer);
+			}else{
+				dataView.addItemBefore(draggedItem, targetConsumer);
+			}
+			System.out.println(dataView.getItems().toList());
+		});
+
+		reorderGrid.addDragEndListener(e -> {
+			draggedItem = null;
+			reorderGrid.setDropMode(null);
+		});
+
+		dialogLayout.add(reorderGrid);
+
+		reorderDialog.add(dialogLayout);
+
+		Button close = new Button("Отмена", e -> {
+			reorderDialog.close();
+		});
+		close.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+		Button accept = new Button("Сохранить", e -> {
+			List<DeliveryOrderNumForConsumer> resultOrder = new ArrayList<>();
+			List<ConsumerWithOrders> items = dataView.getItems().toList();
+			for (int i = 0; i < items.size(); i++){
+				resultOrder.add(new DeliveryOrderNumForConsumer((int) items.get(i).getId(), i));
+			}
+			consumerService.setDeliveryConsumersOrder(resultOrder);
+			refreshGrid();
+			reorderDialog.close();
+		});
+		accept.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+		reorderDialog.getFooter().add(close, accept);
+
+		return button;
+	}
+
+	private String getReorderGridItem(ConsumerWithOrders consumerWithOrders){
+		return consumerWithOrders.getName() + " " + consumerWithOrders.getAddress();
 	}
 }
