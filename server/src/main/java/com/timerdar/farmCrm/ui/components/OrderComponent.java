@@ -59,10 +59,8 @@ public class OrderComponent extends HorizontalLayout {
 		setPadding(false);
 
 		nameLabel = new Span(name);
-		nameLabel.setWidth("30%");
 
 		costLabel = new Span(String.format("%d руб.", cost));
-		costLabel.setWidth("20%");
 
 		countSaveButton = new Button("Сохранить");
 		countSaveButton.setVisible(false);
@@ -74,14 +72,12 @@ public class OrderComponent extends HorizontalLayout {
 			countDisplay = new Div();
 			countDisplay.setText(String.format("%d шт.", count));
 			countDisplay.getStyle().set("cursor", "pointer");
-			countDisplay.setWidth("20%");
 			countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
 
 			countEditor = new IntegerField();
 			countEditor.setPlaceholder("ШТ:");
 			countEditor.setMin(0);
 			countEditor.setValue(count);
-			countEditor.setWidth("20%");
 			countEditor.setVisible(false);
 
 			countSaveButton.addClickListener(e -> saveCount());
@@ -115,14 +111,12 @@ public class OrderComponent extends HorizontalLayout {
 			countDisplay = new Div();
 			countDisplay.setText(String.format("%d шт.", count));
 			countDisplay.getStyle().set("cursor", "pointer");
-			countDisplay.setWidth("20%");
 			countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
 
 			countEditor = new IntegerField();
 			countEditor.setPlaceholder("ШТ:");
 			countEditor.setMin(0);
 			countEditor.setValue(count);
-			countEditor.setWidth("20%");
 			countEditor.setVisible(false);
 
 			Checkbox done = new Checkbox();
@@ -138,14 +132,12 @@ public class OrderComponent extends HorizontalLayout {
 				weightDisplay = new Div();
 				weightDisplay.setText(String.format("%.3f кг", weight));
 				weightDisplay.getStyle().set("cursor", "pointer");
-				weightDisplay.setWidth("20%");
 				weightDisplay.getElement().addEventListener("click", e -> enableEditingWeight());
 
 				weightEditor = new NumberField();
 				weightEditor.setPlaceholder("КГ:");
 				weightEditor.setMin(0);
 				weightEditor.setValue(weight);
-				weightEditor.setWidth("20%");
 				weightEditor.setVisible(false);
 
 				weightSaveButton.addClickListener(e -> saveWeight());
