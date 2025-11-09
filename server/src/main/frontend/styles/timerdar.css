@@ -17,3 +17,11 @@ vaadin-button[theme~="error"] {
     color: white;
 }
 
+
+.custom-dialog-class .vaadin-grid-cell-content {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
