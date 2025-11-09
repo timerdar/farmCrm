@@ -22,6 +22,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -75,7 +76,7 @@ public class ConsumerOrdersView extends OrdersListView {
 		totalSum.setReadOnly(true);
 		totalSum.setWidthFull();
 
-		Div buttons = new Div();
+		HorizontalLayout buttons = new HorizontalLayout();
 
 		Button changeMode = new Button(new Icon(VaadinIcon.EDIT), event -> {
 			name.setReadOnly(false);
@@ -106,11 +107,16 @@ public class ConsumerOrdersView extends OrdersListView {
 		buttons.add(saveData, cancelUpdate);
 		buttons.setVisible(false);
 
-		formLayout.addFormRow(name, address,phone, totalSum);
+		formLayout.add(name, 4);
+		formLayout.add(address, 2);
+		formLayout.add(phone, 2);
+		formLayout.add(totalSum, 2);
 		formLayout.add(buttons, changeMode);
 
 		//TODO обновить на несколько столбцов
-		formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+		formLayout.setResponsiveSteps(
+				new FormLayout.ResponsiveStep("0", 1),
+				new FormLayout.ResponsiveStep("250px", 4));
 
 		return formLayout;
 	}

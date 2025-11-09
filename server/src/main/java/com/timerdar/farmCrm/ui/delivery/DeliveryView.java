@@ -20,8 +20,10 @@ import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,17 +84,33 @@ public class DeliveryView extends VerticalLayout {
 		return orderService.getDeliveryData();
 	}
 
-	//TODO фикс кнопки копирования на айфоне
 	private Button getBillCopyButton(){
 		Button button = new Button("Скопировать чеки доставки");
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setWidthFull();
-		button.addClickListener(e ->
+
+		Dialog copyDialog = new Dialog();
+		VerticalLayout layout = new VerticalLayout();
+		layout.add(new Div("Для копирования нажмите на текст (он сам выделится) и скопируйте его"));
+		TextArea textArea = new TextArea("Чеки доставки");
+		textArea.setValue(orderService.getBills());
+		textArea.setWidth("400px");
+		textArea.setHeight("300px");
+		textArea.setReadOnly(true);
+
+		layout.addClickListener(e ->
 			UI.getCurrent().getPage().executeJs(
-					"navigator.clipboard.writeText($0).then(() => console.log('Copied!'));",
-					orderService.getBills())
+					"var textarea = document.querySelector('vaadin-text-area textarea');" +
+							"textarea.select();"
+			)
 		);
-		button.addClickListener(e -> Notification.show("Чеки скопированы в буфер обмена"));
+
+		Button close = new Button(new Icon(VaadinIcon.CLOSE), e -> copyDialog.close());
+
+		layout.add(textArea);
+		copyDialog.add(layout, close);
+		button.addClickListener(e -> copyDialog.open());
+
 		return button;
 	}
 
@@ -151,6 +169,7 @@ public class DeliveryView extends VerticalLayout {
 		button.setWidthFull();
 
 		Dialog reorderDialog = new Dialog("Изменение порядка доставки");
+		reorderDialog.getElement().getClassList().add("custom-dialog-class");
 
 		button.addClickListener(e -> reorderDialog.open());
 
