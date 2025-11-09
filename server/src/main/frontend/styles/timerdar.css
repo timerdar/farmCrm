@@ -1,10 +1,13 @@
 :root {
 /* Заменяем основной primary цвет */
-  --lumo-primary-color: #4caf50;
-  --lumo-primary-text-color: #000;
+
+--lumo-primary-color: #02aca5;
+--lumo-contrast-70pct: #004643;
+--lumo-primary-text-color: #000;
+--lumo-contrast: #004643;
+--lumo-error-color: #004643;
 
 /* Заменяем error цвет */
-  --lumo-error-color: #f44336; /* ярко-красный */
   --lumo-error-color-50pct: rgba(244, 67, 54, 0.5); /* красно-прозрачный */
   --lumo-error-color-10pct: rgba(244, 67, 54, 0.1);
   --lumo-error-color-90pct: #d32f2f;
