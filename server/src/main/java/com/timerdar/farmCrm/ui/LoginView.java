@@ -3,6 +3,7 @@ package com.timerdar.farmCrm.ui;
 import com.timerdar.farmCrm.dto.AuthRequest;
 import com.timerdar.farmCrm.dto.AuthResponse;
 import com.timerdar.farmCrm.service.AuthService;
+import com.timerdar.farmCrm.ui.consumers.ConsumersView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Route("login")
 public class LoginView extends VerticalLayout {
@@ -20,12 +22,16 @@ public class LoginView extends VerticalLayout {
 	private TextField login = new TextField("Логин");
 	private PasswordField password = new PasswordField("Пароль");
 	private Button loginButton = new Button("Войти");
+	private boolean authenticated = false;
+
 
 	private AuthService authService;
 
 	@Autowired
 	public LoginView(AuthService authService) {
 		this.authService = authService;
+
+
 
 		setSizeFull();
 		setJustifyContentMode(JustifyContentMode.CENTER);
@@ -40,15 +46,8 @@ public class LoginView extends VerticalLayout {
 			try {
 				AuthRequest request = new AuthRequest(login.getValue(), password.getValue());
 				AuthResponse response = authService.login(request);
-
-				// Сохраняем JWT в Vaadin session и localstorage
-				getUI().ifPresent(ui -> {
-					ui.getPage().executeJs("window.localStorage.setItem('AUTH_JWT', $0);", response.getToken());
-					ui.getSession().setAttribute("jwt", response.getToken());
-				});
-
-				// Переходим на главную страницу
-				getUI().ifPresent(ui -> ui.navigate("consumers"));
+				Notification.show("Вход успешный. Перейдите на нужную вкладку", 3000, Notification.Position.MIDDLE);
+				form.setVisible(false);
 
 			} catch (Exception ex) {
 				ex.printStackTrace();

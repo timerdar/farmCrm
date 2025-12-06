@@ -202,7 +202,7 @@ public class DeliveryView extends VerticalLayout {
 			}else{
 				dataView.addItemBefore(draggedItem, targetConsumer);
 			}
-			System.out.println(dataView.getItems().toList());
+			//System.out.println(dataView.getItems().toList());
 		});
 
 		reorderGrid.addDragEndListener(e -> {
