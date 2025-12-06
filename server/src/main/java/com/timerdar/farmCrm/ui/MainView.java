@@ -2,6 +2,7 @@ package com.timerdar.farmCrm.ui;
 
 import com.timerdar.farmCrm.dto.TokenValidationRequest;
 import com.timerdar.farmCrm.service.AuthService;
+import com.timerdar.farmCrm.service.JwtUtil;
 import com.timerdar.farmCrm.ui.consumers.ConsumersView;
 import com.timerdar.farmCrm.ui.delivery.DeliveryView;
 import com.timerdar.farmCrm.ui.products.ProductsView;
@@ -13,8 +14,15 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 @Layout
 @CssImport("./styles/timerdar.css")
@@ -25,13 +33,15 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 	private final Tab products;
 	private final Tab delivery;
 
+	private String COOKIE_NAME = "authToken";
+
 	private AuthService authService;
+	private JwtUtil jwtUtil;
 
 	@Autowired
-	public MainView(AuthService authService) {
+	public MainView(AuthService authService, JwtUtil jwtUtil) {
 		this.authService = authService;
-
-		getLocalStorageToken();
+		this.jwtUtil = jwtUtil;
 
 		consumers = createTab("Заказчики", ConsumersView.class);
 		products = createTab("Продукция", ProductsView.class);
@@ -42,15 +52,6 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		addToNavbar(tabs);
 
 	}
-
-	private void getLocalStorageToken(){
-		UI.getCurrent().getPage().executeJs("return window.localStorage.getItem('AUTH_JWT');").then(String.class, token -> {
-			if (token != null) {
-				UI.getCurrent().getSession().setAttribute("jwt", token);
-			}
-		});
-	}
-
 
 	private Tab createTab(String text, Class<? extends Component> target){
 		RouterLink link = new RouterLink(text, target);
@@ -69,11 +70,44 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 			tabs.setSelectedTab(consumers);
 		}
 	}
+
 	@Override
-	public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-		String jwt = (String) UI.getCurrent().getSession().getAttribute("jwt");
-		if (jwt == null || !authService.authByToken(new TokenValidationRequest(jwt, ""))) {
-			beforeEnterEvent.rerouteTo("login");
+	public void beforeEnter(BeforeEnterEvent event) {
+
+		Optional<String> token = getTokenFromCookie();
+
+		if (token.isEmpty()) {
+			event.forwardTo("/login");
 		}
+
+		try {
+			String username = jwtUtil.extractUsername(token.get());
+			if (!jwtUtil.validateToken(token.get(), username)) {
+				event.forwardTo("/login");
+			}
+		} catch (Exception e) {
+			event.forwardTo("/login");
+		}
+	}
+
+	private Optional<String> getTokenFromCookie() {
+		ServletRequestAttributes attributes =
+				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+		if (attributes == null) {
+			return Optional.empty();
+		}
+
+		HttpServletRequest request = attributes.getRequest();
+		Cookie[] cookies = request.getCookies();
+
+		if (cookies == null) {
+			return Optional.empty();
+		}
+
+		return Arrays.stream(cookies)
+				.filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
+				.map(Cookie::getValue)
+				.findFirst();
 	}
 }
