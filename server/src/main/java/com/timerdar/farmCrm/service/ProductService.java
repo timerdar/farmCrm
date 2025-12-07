@@ -102,4 +102,11 @@ public class ProductService {
 		}
 		return i;
 	}
+
+	@Transactional
+	public void deleteProduct(long productId){
+		Product product = productRepository.getReferenceById(productId);
+		productRepository.delete(product);
+		log.info("Удален продукт: {}", product);
+	}
 }

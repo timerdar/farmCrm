@@ -16,6 +16,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -104,6 +105,22 @@ public class ConsumerOrdersView extends OrdersListView {
 			changeMode.setVisible(true);
 		});
 
+		Button delete = new Button(new Icon(VaadinIcon.TRASH));
+		delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+		ConfirmDialog dialog = new ConfirmDialog();
+		dialog.setHeader("Внимание!");
+		dialog.setText("Вы уверены, что хотите удалить заказчика: " + consumer.getName() + " " + consumer.getAddress());
+		dialog.setCancelable(true);
+		dialog.setCancelText("Отмена");
+		dialog.setConfirmText("Удалить");
+		dialog.setConfirmButtonTheme("error");
+		dialog.addConfirmListener(e -> {
+				orderService.deleteByConsumerId(consumer.getId());
+				getUI().ifPresent(ui -> ui.navigate(ConsumersView.class));
+		});
+		delete.addClickListener(e -> dialog.open());
+
 		buttons.add(saveData, cancelUpdate);
 		buttons.setVisible(false);
 
@@ -112,6 +129,7 @@ public class ConsumerOrdersView extends OrdersListView {
 		formLayout.add(phone, 2);
 		formLayout.add(totalSum, 2);
 		formLayout.add(buttons, changeMode);
+		formLayout.add(delete);
 
 		//TODO обновить на несколько столбцов
 		formLayout.setResponsiveSteps(

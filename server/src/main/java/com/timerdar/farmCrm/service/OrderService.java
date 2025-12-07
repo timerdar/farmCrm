@@ -198,4 +198,25 @@ public class OrderService {
 		sb.append("Сумма заказа: ").append(s).append("\n");
 		return sb.toString();
 	}
+
+	public void deleteByConsumerId(long consumerId){
+		log.info("Удаление заказов для consumerId={}", consumerId);
+		List<Order> listToDelete = orderRepository.findByConsumerId(consumerId);
+		for(Order order: listToDelete){
+			orderRepository.delete(order);
+			log.info("Удален заказ: {}", order);
+		}
+		consumerService.deleteConsumer(consumerId);
+	}
+
+	public void deleteByProductId(long productId){
+		log.info("Удаление заказов для productId={}", productId);
+		List<Order> listToDelete = orderRepository.findByProductId(productId);
+		for(Order order: listToDelete){
+			orderRepository.delete(order);
+			log.info("Удален заказ: {}", order);
+		}
+		productService.deleteProduct(productId);
+	}
+
 }
