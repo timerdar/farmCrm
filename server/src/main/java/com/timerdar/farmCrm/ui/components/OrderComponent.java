@@ -67,21 +67,44 @@ public class OrderComponent extends HorizontalLayout {
 		weightSaveButton = new Button("Сохранить");
 		weightSaveButton.setVisible(false);
 
-		Button actionButton;
-		if (status == OrderStatus.CREATED){
-			countDisplay = new Div();
-			countDisplay.setText(String.format("%d шт.", count));
-			countDisplay.getStyle().set("cursor", "pointer");
-			countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
+		countDisplay = new Div();
+		countDisplay.setText(String.format("%d шт.", count));
+		countDisplay.getStyle().set("cursor", "pointer");
+		countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
 
-			countEditor = new IntegerField();
-			countEditor.setPlaceholder("ШТ:");
-			countEditor.setMin(0);
-			countEditor.setValue(count);
-			countEditor.setVisible(false);
+		countEditor = new IntegerField();
+		countEditor.setPlaceholder("ШТ:");
+		countEditor.setMin(0);
+		countEditor.setValue(count);
+		countEditor.setVisible(false);
+		countEditor.setMaxWidth("80px");
 
-			countSaveButton.addClickListener(e -> saveCount());
-			actionButton = new Button(new Icon(VaadinIcon.CART_O));
+		countSaveButton.addClickListener(e -> saveCount());
+		countSaveButton.addClickListener(e -> updateMainEntity.run());
+
+		add(nameLabel, countDisplay, countEditor, countSaveButton);
+
+		if(isWeighed){
+			weightDisplay = new Div();
+			weightDisplay.setText(String.format("%.3f кг", weight));
+			weightDisplay.getStyle().set("cursor", "pointer");
+			weightDisplay.getElement().addEventListener("click", e -> enableEditingWeight());
+
+			weightEditor = new NumberField();
+			weightEditor.setPlaceholder("КГ:");
+			weightEditor.setMin(0);
+			weightEditor.setValue(weight);
+			weightEditor.setVisible(false);
+			weightEditor.setMaxWidth("80px");
+
+			weightSaveButton.addClickListener(e -> saveWeight());
+			weightSaveButton.addClickListener(e -> updateMainEntity.run());
+
+			add(weightDisplay, weightEditor, weightSaveButton);
+		}
+
+		if(order.getStatus() == OrderStatus.CREATED){
+			Button actionButton = new Button(new Icon(VaadinIcon.CART_O));
 			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "DELIVERY"));
 
 			ConfirmDialog dialog = new ConfirmDialog();
@@ -99,25 +122,16 @@ public class OrderComponent extends HorizontalLayout {
 			Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener(e -> dialog.open());
 
-			add(dialog, nameLabel, countDisplay, countEditor, countSaveButton, actionButton, deleteButton);
-		}else {
-			add(nameLabel);
-			actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
+			add(actionButton, deleteButton);
+		} else {
+
+
+
+			Button actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
 			actionButton.addClickListener(e -> {
 				changeStatusAction(updateGrid, updateMainEntity, "CREATED");
 				this.removeFromParent();
 			});
-
-			countDisplay = new Div();
-			countDisplay.setText(String.format("%d шт.", count));
-			countDisplay.getStyle().set("cursor", "pointer");
-			countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
-
-			countEditor = new IntegerField();
-			countEditor.setPlaceholder("ШТ:");
-			countEditor.setMin(0);
-			countEditor.setValue(count);
-			countEditor.setVisible(false);
 
 			Checkbox done = new Checkbox();
 			done.setValue(status == OrderStatus.DONE);
@@ -127,28 +141,8 @@ public class OrderComponent extends HorizontalLayout {
 				this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
 			});
 
-			countSaveButton.addClickListener(e -> saveCount());
-			if(isWeighed){
-				weightDisplay = new Div();
-				weightDisplay.setText(String.format("%.3f кг", weight));
-				weightDisplay.getStyle().set("cursor", "pointer");
-				weightDisplay.getElement().addEventListener("click", e -> enableEditingWeight());
-
-				weightEditor = new NumberField();
-				weightEditor.setPlaceholder("КГ:");
-				weightEditor.setMin(0);
-				weightEditor.setValue(weight);
-				weightEditor.setVisible(false);
-
-				weightSaveButton.addClickListener(e -> saveWeight());
-				add(countDisplay, countEditor, countSaveButton, weightDisplay, weightEditor, weightSaveButton, costLabel, done, actionButton);
-			}else{
-				add(countDisplay, countEditor, countSaveButton, costLabel, done, actionButton);
-			}
+			add(costLabel, done, actionButton);
 		}
-
-		countSaveButton.addClickListener(e -> updateMainEntity.run());
-		weightSaveButton.addClickListener(e -> updateMainEntity.run());
 	}
 
 	private void enableEditingWeight(){
