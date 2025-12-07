@@ -52,7 +52,7 @@ public class ProductService {
     public ProductWithOrdersCount getProductById(long id){
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()){
-            int ordersCount = orderService.getOrdersCount(product.get().getId(), OrderStatus.CREATED) + orderService.getOrdersCount(product.get().getId(), OrderStatus.DELIVERY);
+            int ordersCount = orderService.getOrdersCount(product.get().getId(), OrderStatus.CREATED);
             log.info("Получение продукта: id = {}", id);
             return new ProductWithOrdersCount(product.get(), ordersCount);
         }else{
