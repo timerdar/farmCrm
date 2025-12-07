@@ -85,4 +85,11 @@ public class ConsumerService {
         }
         log.info("Обновление порядка заказчиков: {}", Arrays.toString(nums.toArray()));
     }
+
+	@Transactional
+	public void deleteConsumer(long consumerId){
+		Consumer consumer = getConsumerById(consumerId);
+		consumerRepository.delete(consumer);
+		log.info("Удален заказчик: {}", consumer);
+	}
 }

@@ -12,10 +12,12 @@ import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.service.ProductService;
 import com.timerdar.farmCrm.ui.components.OrderComponent;
 import com.timerdar.farmCrm.ui.OrdersListView;
+import com.timerdar.farmCrm.ui.consumers.ConsumersView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -103,6 +105,23 @@ public class ProductOrdersView extends OrdersListView {
 			edit.setVisible(true);
 		});
 
+		Button delete = new Button(new Icon(VaadinIcon.TRASH));
+		delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+		ConfirmDialog dialog = new ConfirmDialog();
+		dialog.setHeader("Внимание!");
+		dialog.setText("Вы уверены, что хотите удалить продукт: " + product.getName());
+		dialog.setCancelable(true);
+		dialog.setCancelText("Отмена");
+		dialog.setConfirmText("Удалить");
+		dialog.setConfirmButtonTheme("error");
+		dialog.addConfirmListener(e -> {
+			orderService.deleteByProductId(product.getId());
+			getUI().ifPresent(ui -> ui.navigate(ProductsView.class));
+		});
+		delete.addClickListener(e -> dialog.open());
+
+
 		buttons.add(saveData, cancelData);
 		buttons.setVisible(false);
 
@@ -110,6 +129,7 @@ public class ProductOrdersView extends OrdersListView {
 		card.add(cost, createdCount, orderedCount);
 		card.setRowSpacing("30px");
 		card.add(buttons, edit);
+		card.add(delete);
 
 		card.setResponsiveSteps(
 				new FormLayout.ResponsiveStep("0", 1),

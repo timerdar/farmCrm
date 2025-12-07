@@ -54,12 +54,12 @@ public class OrderService {
         List<OrderWithNameAndWeightable> ordersWithName = new ArrayList<>();
         List<Order> orders = source.equals("products") ? getOrdersOfProduct(id, orderStatus) : getOrdersOfConsumer(id, orderStatus);
         for(Order order: orders){
+			Product product = productService.getProductById(order.getProductId());
             if(source.equals("consumers")){
-                Product product = productService.getProductById(order.getProductId());
                 ordersWithName.add(new OrderWithNameAndWeightable(order, product.getName(), product.isWeighed()));
             }else{
                 Consumer consumer = consumerService.getConsumerById(order.getConsumerId());
-                ordersWithName.add(new OrderWithNameAndWeightable(order, consumer.getName(), true));
+                ordersWithName.add(new OrderWithNameAndWeightable(order, consumer.getName(), product.isWeighed()));
             }
         }
         log.info("Получение заказов: source = {}, {}Id = {}, status = {}", source, source, id, status);
@@ -160,6 +160,7 @@ public class OrderService {
 
 	public String getBills(){
 		StringBuilder sb = new StringBuilder();
+		int totalSumOfDelivery = 0;
 		for (ConsumerWithOrders consumer : getDeliveryData()){
 			sb.append(consumer.getName()).append("\n");
 			sb.append(consumer.getPhone()).append("\n");
@@ -174,11 +175,48 @@ public class OrderService {
 					ordersSb.append(order.getWeight()).append(" кг ");
 				ordersSb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
 			}
-			sb.append("Сумма заказа: ").append(s).append("\n");
 			sb.append(ordersSb);
+			sb.append("Сумма заказа: ").append(s).append(" 	руб.\n");
 			sb.append("\n");
+			totalSumOfDelivery += s;
 		}
+		sb.append("\nОбщая сумма доставки: ").append(totalSumOfDelivery).append(" руб. Молодцы! Хорошая работа!");
 		log.info("Получены чеки доставки");
 		return sb.toString();
 	}
+
+	public String getBillOfConsumer(long consumerId){
+		StringBuilder sb = new StringBuilder();
+		int s = 0;
+		for (OrderWithNameAndWeightable order : getOrdersWithName(consumerId, "consumers", "DELIVERY")){
+			s = s + order.getCost();
+			sb.append(order.getName()).append(" ");
+			if(order.isWeighed())
+				sb.append(order.getWeight()).append(" кг ");
+			sb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
+		}
+		sb.append("Сумма заказа: ").append(s).append("\n");
+		return sb.toString();
+	}
+
+	public void deleteByConsumerId(long consumerId){
+		log.info("Удаление заказов для consumerId={}", consumerId);
+		List<Order> listToDelete = orderRepository.findByConsumerId(consumerId);
+		for(Order order: listToDelete){
+			orderRepository.delete(order);
+			log.info("Удален заказ: {}", order);
+		}
+		consumerService.deleteConsumer(consumerId);
+	}
+
+	public void deleteByProductId(long productId){
+		log.info("Удаление заказов для productId={}", productId);
+		List<Order> listToDelete = orderRepository.findByProductId(productId);
+		for(Order order: listToDelete){
+			orderRepository.delete(order);
+			log.info("Удален заказ: {}", order);
+		}
+		productService.deleteProduct(productId);
+	}
+
 }
