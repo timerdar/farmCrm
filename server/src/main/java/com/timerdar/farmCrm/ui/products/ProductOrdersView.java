@@ -141,7 +141,9 @@ public class ProductOrdersView extends OrdersListView {
 
 	@Override
 	public Component getGridItem(OrderWithNameAndWeightable order) {
-		return new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
+		OrderComponent component = new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
+		component.getStyle().set("overflow-x", "auto");
+		return component;
 	}
 
 	@Override
