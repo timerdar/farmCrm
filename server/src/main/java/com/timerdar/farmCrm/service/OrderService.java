@@ -160,6 +160,7 @@ public class OrderService {
 
 	public String getBills(){
 		StringBuilder sb = new StringBuilder();
+		int totalSumOfDelivery = 0;
 		for (ConsumerWithOrders consumer : getDeliveryData()){
 			sb.append(consumer.getName()).append("\n");
 			sb.append(consumer.getPhone()).append("\n");
@@ -177,8 +178,24 @@ public class OrderService {
 			sb.append("Сумма заказа: ").append(s).append("\n");
 			sb.append(ordersSb);
 			sb.append("\n");
+			totalSumOfDelivery += s;
 		}
+		sb.append("\nОбщая сумма доставки: ").append(totalSumOfDelivery).append(" руб. Молодцы! Хорошая работа!");
 		log.info("Получены чеки доставки");
+		return sb.toString();
+	}
+
+	public String getBillOfConsumer(long consumerId){
+		StringBuilder sb = new StringBuilder();
+		int s = 0;
+		for (OrderWithNameAndWeightable order : getOrdersWithName(consumerId, "consumers", "DELIVERY")){
+			s = s + order.getCost();
+			sb.append(order.getName()).append(" ");
+			if(order.isWeighed())
+				sb.append(order.getWeight()).append(" кг ");
+			sb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
+		}
+		sb.append("Сумма заказа: ").append(s).append("\n");
 		return sb.toString();
 	}
 }

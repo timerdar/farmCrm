@@ -6,13 +6,13 @@ import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Layout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,8 @@ public class ConsumerWithOrdersComponent extends Details {
 		VerticalLayout layout = new VerticalLayout(
 				new Div(consumer.getAddress()),
 				new Div(consumer.getPhone()),
-				new Div("Сумма " + getSum(consumer.getOrders()) + " руб.")
+				new Div("Сумма " + getSum(consumer.getOrders()) + " руб."),
+				new Button("Отправить чек", new Icon(VaadinIcon.SHARE), e -> shareText("Отправка чека " + consumer.getName(), orderService.getBillOfConsumer(consumer.getId())))
 		);
 		layout.setSpacing(false);
 		card.setSubtitle(layout);
@@ -70,6 +71,21 @@ public class ConsumerWithOrdersComponent extends Details {
 			card.getStyle().set("background-color", "#4caf50");
 		return card;
 	}
+
+	private void shareText(String title, String text) {
+		getElement().executeJs("""
+        if (navigator.share) {
+            navigator.share({
+                title: $0,
+                text: $1
+            }).catch(err => console.log('Ошибка шаринга:', err));
+        } else {
+            navigator.clipboard.writeText($1)
+                .then(() => alert('Текст скопирован в буфер'));
+        }
+        """, title, text);
+	}
+
 
 	private void updateConsumer(){
 		updateGrid();
