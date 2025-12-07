@@ -1,3 +1,3 @@
 git pull;
 docker-compose down;
-docker compose --build -d;
+docker-compose up --build -d;
