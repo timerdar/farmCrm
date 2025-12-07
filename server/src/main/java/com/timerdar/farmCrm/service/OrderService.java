@@ -195,7 +195,7 @@ public class OrderService {
 				sb.append(order.getWeight()).append(" кг ");
 			sb.append(order.getCount()).append(" шт ").append(order.getCost()).append(" руб\n");
 		}
-		sb.append("Сумма заказа: ").append(s).append("\n");
+		sb.append("Сумма заказа: ").append(s).append(" руб.\n");
 		return sb.toString();
 	}
 
