@@ -22,6 +22,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select * from products where id in (select product_id from orders where status = 'DELIVERY' or status = 'DONE')", nativeQuery = true)
     List<Product> getProductsListFromDelivery();
 
+	@Query(value = "select * from products where id in (select product_id from orders where status = 'CREATED')", nativeQuery = true)
+	List<Product> getProductsListFromCreated();
+
 	@Modifying
 	@Query(value = "update Products set name = ?2, cost = ?3, created_count = ?4 where id = ?1;", nativeQuery = true)
 	int updateProduct(long productId, String name, double cost, int createdCount);

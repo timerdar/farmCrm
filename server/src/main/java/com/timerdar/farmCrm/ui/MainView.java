@@ -29,6 +29,7 @@ import java.util.Optional;
 public class MainView extends AppLayout implements AfterNavigationObserver, BeforeEnterObserver {
 
 	private final Tabs tabs;
+	private final Tab currentOrders;
 	private final Tab consumers;
 	private final Tab products;
 	private final Tab delivery;
@@ -43,13 +44,16 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		this.authService = authService;
 		this.jwtUtil = jwtUtil;
 
+		currentOrders = createTab("Текущие", CurrentOrdersView.class);
 		consumers = createTab("Заказчики", ConsumersView.class);
 		products = createTab("Продукция", ProductsView.class);
 		delivery = createTab("Доставка", DeliveryView.class);
 
-		tabs = new Tabs(consumers, products, delivery);
+		tabs = new Tabs(currentOrders, consumers, products, delivery);
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
-		addToNavbar(tabs);
+		tabs.getStyle().set("overflow-x", "auto");
+
+		addToNavbar(true, tabs);
 
 	}
 
@@ -66,8 +70,10 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 			tabs.setSelectedTab(delivery);
 		} else if (route.startsWith("products")) {
 			tabs.setSelectedTab(products);
-		} else {
+		} else if (route.startsWith("consumers")){
 			tabs.setSelectedTab(consumers);
+		} else {
+			tabs.setSelectedTab(currentOrders);
 		}
 	}
 

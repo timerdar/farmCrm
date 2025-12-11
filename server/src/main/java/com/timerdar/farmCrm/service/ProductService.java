@@ -90,6 +90,16 @@ public class ProductService {
         return productRepository.getProductsListFromDelivery();
     }
 
+	public List<ProductWithOrdersCount> getProductsFromCreated() {
+		log.info("Получение списка заказанных продуктов");
+		List<ProductWithOrdersCount> res = new ArrayList<>();
+		for(Product product: productRepository.getProductsListFromCreated()){
+			int orderCount = orderService.getOrdersCount(product.getId(), OrderStatus.CREATED);
+			res.add(new ProductWithOrdersCount(product, orderCount));
+		}
+		return res;
+	}
+
 	@Transactional
 	public int updateProduct(ProductChangeRequest request){
 		log.info("Обновление данных продукта: req = {}", request);
