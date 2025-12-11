@@ -85,7 +85,7 @@ public abstract class EntitiesListView extends VerticalLayout {
 		grid.setHeightFull();
 		grid.addSelectionListener(e -> {
 			String[] className = getClass().getName().split("\\.");
-			if (className[className.length - 1].startsWith("Product")) {
+			if (className[className.length - 1].startsWith("Product") || className[className.length - 1].startsWith("Current")) {
 				UI.getCurrent().navigate(ProductOrdersView.class,
 						new RouteParameters("id", getEntityId(e.getFirstSelectedItem().get())));
 			} else if (className[className.length - 1].startsWith("Consumer")) {
@@ -97,5 +97,13 @@ public abstract class EntitiesListView extends VerticalLayout {
 
 		grid.addColumn(new ComponentRenderer<>(this::getEntityCard));
 		return grid;
+	}
+
+	public void setDialog(Dialog newCreationDialog){
+		Button newCreationButton = getCreationButon(newCreationDialog);
+		replace(creationButton, newCreationButton);
+		replace(creationDialog, newCreationDialog);
+		creationDialog = newCreationDialog;
+		creationButton = newCreationButton;
 	}
 }
