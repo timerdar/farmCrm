@@ -35,8 +35,7 @@ public class AuthService {
 
 	private final String COOKIE_NAME = "authToken";
 
-	@Value("${jwt.lifetime}")
-	private int COOKIE_MAX_AGE;
+	private int COOKIE_MAX_AGE = 630720000;
 
 	public AuthResponse login(AuthRequest authRequest){
 		Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
@@ -64,7 +63,7 @@ public class AuthService {
 
 			Cookie cookie = new Cookie(COOKIE_NAME, token);
 			cookie.setHttpOnly(true);
-			cookie.setSecure(false);
+			cookie.setSecure(true);
 			cookie.setPath("/");
 			cookie.setMaxAge(COOKIE_MAX_AGE);
 

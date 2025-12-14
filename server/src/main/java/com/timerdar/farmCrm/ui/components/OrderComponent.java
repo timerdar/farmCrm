@@ -122,10 +122,8 @@ public class OrderComponent extends HorizontalLayout {
 			Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener(e -> dialog.open());
 
-			add(actionButton, deleteButton);
+			add(costLabel, actionButton, deleteButton);
 		} else {
-
-
 
 			Button actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
 			actionButton.addClickListener(e -> {

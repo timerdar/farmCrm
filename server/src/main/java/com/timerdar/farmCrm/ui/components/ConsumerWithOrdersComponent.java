@@ -12,6 +12,7 @@ import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.ArrayList;
@@ -63,7 +64,11 @@ public class ConsumerWithOrdersComponent extends Details {
 				new Div(consumer.getAddress()),
 				new Div(consumer.getPhone()),
 				new Div("Сумма " + getSum(consumer.getOrders()) + " руб."),
-				new Button("Отправить чек", new Icon(VaadinIcon.SHARE), e -> shareText("Отправка чека " + consumer.getName(), orderService.getBillOfConsumer(consumer.getId())))
+				new Button("Отправить чек", new Icon(VaadinIcon.SHARE), e -> {
+					String bill = orderService.getBillOfConsumer(consumer.getId());
+					shareText("Отправка чека " + consumer.getName(), bill);
+					copyToClipboard(bill);
+				})
 		);
 		layout.setSpacing(false);
 		card.setSubtitle(layout);
@@ -84,6 +89,31 @@ public class ConsumerWithOrdersComponent extends Details {
                 .then(() => alert('Текст скопирован в буфер'));
         }
         """, title, text);
+	}
+
+	private void copyToClipboard(String text) {
+		getUI().ifPresent(ui -> {
+			ui.getPage().executeJs("""
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText($0).then(() => {
+                        console.log('Скопировано через Clipboard API');
+                    }).catch(err => {
+                        fallbackCopy($0);
+                    });
+                } else {
+                    fallbackCopy($0);
+                }
+                function fallbackCopy(text) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+                """, text);
+		});
+		Notification.show("Дополнительно текст скопирован в буфер обмена");
 	}
 
 
