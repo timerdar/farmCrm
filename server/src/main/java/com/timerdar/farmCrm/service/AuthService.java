@@ -66,6 +66,7 @@ public class AuthService {
 			cookie.setSecure(true);
 			cookie.setPath("/");
 			cookie.setMaxAge(COOKIE_MAX_AGE);
+			cookie.setAttribute("SameSite", "None");
 
 			response.addCookie(cookie);
 		}
