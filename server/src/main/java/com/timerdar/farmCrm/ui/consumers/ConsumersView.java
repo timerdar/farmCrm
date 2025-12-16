@@ -95,7 +95,11 @@ public class ConsumersView extends EntitiesListView {
 		Consumer consumer = (Consumer) object;
 		Card card = new Card();
 		card.setTitle(consumer.getName());
-		card.setSubtitle(new Div(consumer.getAddress()));
+		VerticalLayout l = new VerticalLayout(
+				new Div(consumer.getAddress()),
+				new Div("Сумма выкупа - " + consumer.getTotalSum() + " руб."));
+		l.setSpacing(false);
+		card.setSubtitle(l);
 		return card;
 	}
 
