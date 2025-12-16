@@ -94,6 +94,7 @@ public abstract class EntitiesListView extends VerticalLayout {
 
 			}
 		});
+		grid.addClassName("flexible-grid");
 
 		grid.addColumn(new ComponentRenderer<>(this::getEntityCard));
 		return grid;

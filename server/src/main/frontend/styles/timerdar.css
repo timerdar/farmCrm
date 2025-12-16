@@ -28,13 +28,13 @@ vaadin-button[theme~="error"] {
     -ms-user-select: none;
 }
 
-vaadin-grid::part(body-cell) {
+.flexible-grid::part(body-cell) {
     height: auto;
     min-height: 110px;
     padding: 8px !important;
     overflow: visible !important;
 }
 
-vaadin-grid::part(row) {
+.flexible-grid::part(row) {
     height: auto !important;
 }

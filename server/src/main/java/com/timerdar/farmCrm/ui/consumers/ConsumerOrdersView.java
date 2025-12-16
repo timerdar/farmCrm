@@ -72,8 +72,8 @@ public class ConsumerOrdersView extends OrdersListView {
 		phone.setReadOnly(true);
 		phone.setWidthFull();
 
-		IntegerField totalSum = new IntegerField("Сумма выкупа");
-		totalSum.setValue(consumer.getTotalSum());
+		IntegerField totalSum = new IntegerField("Сумма заказов (Руб) (предварительно)");
+		totalSum.setValue(getOrdersSum());
 		totalSum.setReadOnly(true);
 		totalSum.setWidthFull();
 
@@ -131,7 +131,6 @@ public class ConsumerOrdersView extends OrdersListView {
 		formLayout.add(buttons, changeMode);
 		formLayout.add(delete);
 
-		//TODO обновить на несколько столбцов
 		formLayout.setResponsiveSteps(
 				new FormLayout.ResponsiveStep("0", 1),
 				new FormLayout.ResponsiveStep("250px", 4));
@@ -193,5 +192,12 @@ public class ConsumerOrdersView extends OrdersListView {
 
 		dialog.getFooter().add(cancelButton, saveButton);
 		return dialog;
+	}
+
+	private int getOrdersSum() {
+		int i = 0;
+		for (OrderWithNameAndWeightable order: getData())
+			i += order.getCost();
+		return i;
 	}
 }
