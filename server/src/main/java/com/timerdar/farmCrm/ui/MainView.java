@@ -53,7 +53,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 		tabs.getStyle().set("overflow-x", "auto");
 
-		addToNavbar(true, tabs);
+		addToNavbar(tabs);
 
 	}
 
