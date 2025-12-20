@@ -23,8 +23,8 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET;
 
-    @Value("${jwt.lifetime}")
-    private long EXPIRATION_MS;
+    //@Value("${jwt.lifetime}")
+    private long EXPIRATION_MS = 2592000000L;
 
     private SecretKey secretKey;
 
