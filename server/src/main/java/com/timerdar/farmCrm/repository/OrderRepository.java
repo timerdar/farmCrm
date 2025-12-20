@@ -32,11 +32,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "order by c.delivery_order_number asc;", nativeQuery = true)
     List<Long> getConsumerIdsByStatus(@Param("status") String status);
 
-    @Query(value = "select distinct o.consumer_id, c.delivery_order_number\n" +
+    @Query(value = "select distinct o.consumer_id, c.delivery_order_number, c.name\n" +
             "from orders o\n" +
             "join consumers c on o.consumer_id = c.id\n" +
             "where o.status = 'DELIVERY' or o.status = 'DONE'\n" +
-            "order by c.delivery_order_number asc;", nativeQuery = true)
+            "order by c.delivery_order_number asc, c.name asc;", nativeQuery = true)
     List<Long> getDeliveryConsumerIds();
 
     @Query(value = "select * from orders where status = 'DELIVERY' or status = 'DONE';", nativeQuery = true)
