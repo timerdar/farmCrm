@@ -16,19 +16,28 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public abstract class EntitiesListView extends VerticalLayout {
+public abstract class EntitiesListView extends VerticalLayout implements BeforeEnterObserver {
+
+	private static final String PARAM_SCROLL_INDEX = "scrollIndex";
 
 	private Component search;
 	private Dialog creationDialog;
 	private Component creationButton;
 	protected Grid grid;
+	protected DataView dataView;
+
+	private int savedScrollIndex = 0;
 
 	public EntitiesListView(){
 		setAlignItems(Alignment.CENTER);
@@ -50,7 +59,11 @@ public abstract class EntitiesListView extends VerticalLayout {
 	abstract public String getEntityId(Object object);
 
 	public void refreshGrid(){
-		grid.setItems(getData());
+		dataView = grid.setItems(getData());
+
+		if (savedScrollIndex > 0) {
+			grid.scrollToIndex(savedScrollIndex);
+		}
 	}
 
 	public Button getCreationButon(Dialog creationDialog){
@@ -83,15 +96,43 @@ public abstract class EntitiesListView extends VerticalLayout {
 		grid.setEmptyStateComponent(new Div("Записи не найдены :("));
 		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
 		grid.setHeightFull();
-		grid.addSelectionListener(e -> {
-			String[] className = getClass().getName().split("\\.");
-			if (className[className.length - 1].startsWith("Product") || className[className.length - 1].startsWith("Current")) {
-				UI.getCurrent().navigate(ProductOrdersView.class,
-						new RouteParameters("id", getEntityId(e.getFirstSelectedItem().get())));
-			} else if (className[className.length - 1].startsWith("Consumer")) {
-				UI.getCurrent().navigate(ConsumerOrdersView.class,
-						new RouteParameters("id", getEntityId(e.getFirstSelectedItem().get())));
+		grid.addItemClickListener(e -> {
+			if (dataView != null) {
+				dataView.getItemIndex(e.getItem()).ifPresent(index -> {
+					int scrollIndex = (int) index;
 
+					UI ui = UI.getCurrent();
+					History history = ui.getPage().getHistory();
+
+					Location currentLocation = ui.getInternals().getActiveViewLocation();
+					Map<String, List<String>> params =
+							new java.util.HashMap<>(currentLocation.getQueryParameters().getParameters());
+
+					params.put("scrollIndex", java.util.List.of(String.valueOf(scrollIndex)));
+
+					Location newLocation = new Location(
+							currentLocation.getPath(),
+							new QueryParameters(params)
+					);
+
+					history.pushState(null, newLocation);
+				});
+			}
+
+			String[] className = getClass().getName().split("\\.");
+			String simple = className[className.length - 1];
+			RouteParameters routeParameters =
+					new RouteParameters("id", getEntityId(e.getItem()));
+
+			if (simple.startsWith("Product") || simple.startsWith("Current")) {
+				UI.getCurrent().navigate(
+						ProductOrdersView.class,
+						routeParameters);
+			} else if (simple.startsWith("Consumer")) {
+				UI.getCurrent().navigate(
+						ConsumerOrdersView.class,
+						routeParameters
+				);
 			}
 		});
 		grid.addClassName("flexible-grid");
@@ -106,5 +147,19 @@ public abstract class EntitiesListView extends VerticalLayout {
 		replace(creationDialog, newCreationDialog);
 		creationDialog = newCreationDialog;
 		creationButton = newCreationButton;
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		QueryParameters qp = event.getLocation().getQueryParameters();
+		List<String> values = qp.getParameters().get(PARAM_SCROLL_INDEX);
+		if (values != null && !values.isEmpty()) {
+			try {
+				savedScrollIndex = Integer.parseInt(values.get(0));
+			} catch (NumberFormatException ignored) {
+				savedScrollIndex = 0;
+			}
+		}
+		refreshGrid();
 	}
 }
