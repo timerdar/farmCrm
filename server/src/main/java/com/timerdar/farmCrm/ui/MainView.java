@@ -14,6 +14,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.checkerframework.checker.units.qual.A;
@@ -97,19 +99,14 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 	}
 
 	private Optional<String> getTokenFromCookie() {
-		ServletRequestAttributes attributes =
-				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		VaadinRequest request = VaadinService.getCurrentRequest();
+		Cookie[] cookies = null;
 
-		if (attributes == null) {
+		if (request != null)
+			cookies = request.getCookies();
+
+		if (cookies == null)
 			return Optional.empty();
-		}
-
-		HttpServletRequest request = attributes.getRequest();
-		Cookie[] cookies = request.getCookies();
-
-		if (cookies == null) {
-			return Optional.empty();
-		}
 
 		return Arrays.stream(cookies)
 				.filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
