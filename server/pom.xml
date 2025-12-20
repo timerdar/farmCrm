@@ -8,7 +8,7 @@
 		<version>3.5.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.timerdar</groupId>
+    <groupId>com.timerdar</groupId>
 	<artifactId>farmCrm</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>farmCrm</name>
@@ -100,6 +100,11 @@
 			<version>0.13.0</version>
 			<scope>runtime</scope>
 		</dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <version>24.8.0</version>
+        </dependency>
 
 	</dependencies>
 
@@ -129,7 +134,34 @@
 					</excludes>
 				</configuration>
 			</plugin>
-		</plugins>
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>24.8.0</version> <!-- укажите вашу актуальную версию -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                            <goal>build-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
 	</build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-bom</artifactId>
+                <version>24.8.0</version>  <!-- замените на последнюю стабильную -->
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
 
 </project>

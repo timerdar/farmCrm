@@ -6,13 +6,13 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: farm
+      POSTGRES_DB: farmTest
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5678:5432"
 
-  backend:
+  app:
     volumes:
       - ./logs:/app/logs
     build:
@@ -21,7 +21,7 @@ services:
       args:
         MAVEN_OPTS: "-DskipTests"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5678/farm
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdb:5432/farmTest
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       SPRING_PROFILES_ACTIVE: prod
@@ -29,17 +29,12 @@ services:
       ADMIN_PASSWORD: newpassword
       JWT_SECRET: J53wwJS6tKkv3wPXlbOhj32MWisMyIy1JOo0MAAJOmQZBvqujfBp1d2jN6mFp7v1wHTB9dQIakpSCXALfoei5OYI2cifEf6yDKKKanGc4Sgfoxe9MHeNIKj8tL1jfcokvebh3bKHa2rO1ruohwxYhIWdh65oUx24CPj7M84gDXp7zjJHtwWlxlGA7bE9nvJHucc2V0wBRL7OFaomsM5qeVGAlonIMCrA2yqE1iBqpMDYlOCUBFJIjutptnjRZaJ6
       JWT_LIFETIME: 3600000
+
+      SERVER_PORT: 9080
     depends_on:
       - postgresdb
     ports:
-      - "8081:8080"
-
-  frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+      - "9080:9080"
 
 volumes:
   pgdata:

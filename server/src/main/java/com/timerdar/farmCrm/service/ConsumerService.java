@@ -1,5 +1,6 @@
 package com.timerdar.farmCrm.service;
 
+import com.timerdar.farmCrm.dto.ConsumerChangeRequest;
 import com.timerdar.farmCrm.dto.CreateConsumerRequest;
 import com.timerdar.farmCrm.dto.DeliveryOrderNumForConsumer;
 import com.timerdar.farmCrm.model.Consumer;
@@ -56,6 +57,12 @@ public class ConsumerService {
         return consumerRepository.updatePhone(id, phone);
     }
 
+	@Transactional
+	public int updateConsumer(ConsumerChangeRequest req){
+		log.info("Обновление данных заказчика: req = {}", req);
+		return consumerRepository.updateConsumer(req.getId(), req.getName(), req.getAddress(), req.getPhone());
+	}
+
     public boolean isConsumerExists(long id){
         return consumerRepository.existsById(id);
     }
@@ -78,4 +85,11 @@ public class ConsumerService {
         }
         log.info("Обновление порядка заказчиков: {}", Arrays.toString(nums.toArray()));
     }
+
+	@Transactional
+	public void deleteConsumer(long consumerId){
+		Consumer consumer = getConsumerById(consumerId);
+		consumerRepository.delete(consumer);
+		log.info("Удален заказчик: {}", consumer);
+	}
 }

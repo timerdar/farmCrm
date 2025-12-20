@@ -16,22 +16,15 @@ Thumbs.db
 
 # Логи
 server/logs
+server/node_modules/
+server/src/main/bundles
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Dependency directories
-node_modules/
-
-# Client specific
-client/node_modules/
-client/dist/
-client/.cache/
-client/.parcel-cache/
-
 # Server specific (Java/Maven)
-server/target/
+target/
 server/HELP.md
 server/.mvn/wrapper/maven-wrapper.jar
 !server/**/src/main/**/target/
@@ -56,6 +49,15 @@ server/*.iml
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+server/src/main/frontend/generated
+src/main/frontend/generated
+pnpmfile.js
+.npmrc
+webpack.generated.js
+vite.generated.ts
+logs
+
 
 # Docker
 .env

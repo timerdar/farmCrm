@@ -6,23 +6,20 @@ import com.timerdar.farmCrm.dto.AuthResponse;
 import com.timerdar.farmCrm.dto.TokenValidationRequest;
 import com.timerdar.farmCrm.model.Admin;
 import com.timerdar.farmCrm.service.AdminDetailsService;
+import com.timerdar.farmCrm.service.AuthService;
 import com.timerdar.farmCrm.service.JwtUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @Slf4j
 public class AuthController {
 
@@ -37,19 +34,12 @@ public class AuthController {
     @Autowired
     private Environment env;
 
+	@Autowired
+	private AuthService authService;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authRequest.getLogin(),
-                authRequest.getPassword()
-            ));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неправильный логин или пароль");
-        }
-        final UserDetails userDetails = adminDetailsService.loadUserByUsername(authRequest.getLogin());
-        final String jwt = jwtUtil.generateToken(userDetails.getUsername());
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        return ResponseEntity.ok(authService.login(authRequest));
     }
 
     @PostMapping("/check-login")
@@ -66,7 +56,7 @@ public class AuthController {
 
     @PostMapping("/token")
     public ResponseEntity<?> authByToken(@RequestBody TokenValidationRequest request) {
-        return jwtUtil.isTokenValid(request.getToken()) ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        return authService.authByToken(request) ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostConstruct

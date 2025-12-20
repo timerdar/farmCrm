@@ -1,8 +1,10 @@
 package com.timerdar.farmCrm.service;
 
 import com.timerdar.farmCrm.dto.CreateProductRequest;
+import com.timerdar.farmCrm.dto.ProductChangeRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.dto.ShortProductInfo;
+import com.timerdar.farmCrm.model.Order;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.model.Product;
 import com.timerdar.farmCrm.repository.ProductRepository;
@@ -50,7 +52,7 @@ public class ProductService {
     public ProductWithOrdersCount getProductById(long id){
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()){
-            int ordersCount = orderService.getOrdersCount(product.get().getId(), OrderStatus.CREATED) + orderService.getOrdersCount(product.get().getId(), OrderStatus.DELIVERY);
+            int ordersCount = orderService.getOrdersCount(product.get().getId(), OrderStatus.CREATED);
             log.info("Получение продукта: id = {}", id);
             return new ProductWithOrdersCount(product.get(), ordersCount);
         }else{
@@ -87,4 +89,34 @@ public class ProductService {
         log.info("Получение списка продуктов, которые находятся в доставке");
         return productRepository.getProductsListFromDelivery();
     }
+
+	public List<ProductWithOrdersCount> getProductsFromCreated() {
+		log.info("Получение списка заказанных продуктов");
+		List<ProductWithOrdersCount> res = new ArrayList<>();
+		for(Product product: productRepository.getProductsListFromCreated()){
+			int orderCount = orderService.getOrdersCount(product.getId(), OrderStatus.CREATED);
+			res.add(new ProductWithOrdersCount(product, orderCount));
+		}
+		return res;
+	}
+
+	@Transactional
+	public int updateProduct(ProductChangeRequest request){
+		log.info("Обновление данных продукта: req = {}", request);
+		int i = productRepository.updateProduct(request.getId(), request.getName(), request.getCost(), request.getCreatedCount());
+		for(Order order : orderService.getOrdersOfProduct(request.getId(), OrderStatus.CREATED)){
+			orderService.evalCost(order.getId());
+		}
+		for (Order order : orderService.getOrdersOfProduct(request.getId(), OrderStatus.DELIVERY)){
+			orderService.evalCost(order.getId());
+		}
+		return i;
+	}
+
+	@Transactional
+	public void deleteProduct(long productId){
+		Product product = productRepository.getReferenceById(productId);
+		productRepository.delete(product);
+		log.info("Удален продукт: {}", product);
+	}
 }

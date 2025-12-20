@@ -1,0 +1,40 @@
+:root {
+/* Заменяем основной primary цвет */
+
+--lumo-primary-color: #02aca5;
+--lumo-contrast-70pct: #004643;
+--lumo-primary-text-color: #000;
+--lumo-contrast: #004643;
+--lumo-error-color: #004643;
+
+/* Заменяем error цвет */
+  --lumo-error-color-50pct: rgba(244, 67, 54, 0.5); /* красно-прозрачный */
+  --lumo-error-color-10pct: rgba(244, 67, 54, 0.1);
+  --lumo-error-color-90pct: #d32f2f;
+
+  --vaadin-grid-cell-padding: 3px;
+}
+
+vaadin-button[theme~="error"] {
+    background-color: var(--lumo-error-color);
+    color: white;
+}
+
+
+.custom-dialog-class .vaadin-grid-cell-content {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.flexible-grid::part(body-cell) {
+    height: auto;
+    min-height: 110px;
+    padding: 8px !important;
+    overflow: visible !important;
+}
+
+.flexible-grid::part(row) {
+    height: auto !important;
+}
