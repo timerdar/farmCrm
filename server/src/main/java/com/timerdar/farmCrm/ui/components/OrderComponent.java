@@ -17,7 +17,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 
-public class OrderComponent extends VerticalLayout {
+public class OrderComponent extends HorizontalLayout {
 
 	private Span nameLabel;
 	private Div countDisplay;        // Отображение количества
@@ -93,9 +93,9 @@ public class OrderComponent extends VerticalLayout {
 		countSaveButton.addClickListener(e -> saveCount());
 		countSaveButton.addClickListener(e -> updateMainEntity.run());
 
-		//add(nameLabel, countDisplay, countEditor, countSaveButton);
-		firstRow.add(nameLabel, countDisplay, countEditor, countSaveButton);
-		firstRow.setFlexGrow(1f, nameLabel, countDisplay);
+		add(nameLabel, countDisplay, countEditor, countSaveButton);
+		//firstRow.add(nameLabel, countDisplay, countEditor, countSaveButton);
+		//firstRow.setFlexGrow(1f, nameLabel, countDisplay);
 
 
 		if(isWeighed){
@@ -114,9 +114,9 @@ public class OrderComponent extends VerticalLayout {
 			weightSaveButton.addClickListener(e -> saveWeight());
 			weightSaveButton.addClickListener(e -> updateMainEntity.run());
 
-			//add(weightDisplay, weightEditor, weightSaveButton);
-			firstRow.add(weightDisplay, weightEditor, weightSaveButton);
-			firstRow.setFlexGrow(1f, weightDisplay);
+			add(weightDisplay, weightEditor, weightSaveButton);
+			//firstRow.add(weightDisplay, weightEditor, weightSaveButton);
+			//firstRow.setFlexGrow(1f, weightDisplay);
 		}
 
 		if(order.getStatus() == OrderStatus.CREATED){
@@ -138,10 +138,10 @@ public class OrderComponent extends VerticalLayout {
 			Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener(e -> dialog.open());
 
-			//add(costLabel, actionButton, deleteButton);
-			firstRow.add(costLabel);
-			secondRow.add(actionButton, deleteButton);
-			firstRow.setFlexGrow(1f, costLabel);
+			add(costLabel, actionButton, deleteButton);
+			//firstRow.add(costLabel);
+			//secondRow.add(actionButton, deleteButton);
+			//firstRow.setFlexGrow(1f, costLabel);
 
 		} else {
 
@@ -159,13 +159,11 @@ public class OrderComponent extends VerticalLayout {
 				this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
 			});
 
-			//add(costLabel, done, actionButton);
-			firstRow.add(costLabel);
-			firstRow.setFlexGrow(1f, costLabel);
-			secondRow.add(done, actionButton);
+			add(costLabel, done, actionButton);
+			//firstRow.add(costLabel);
+			//firstRow.setFlexGrow(1f, costLabel);
+			//secondRow.add(done, actionButton);
 		}
-
-		add(firstRow, secondRow);
 	}
 
 	private void enableEditingWeight(){
