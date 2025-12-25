@@ -15,9 +15,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByProductId(long productId);
 
-    List<Order> findByConsumerIdAndStatus(long consumerId, OrderStatus status);
+    List<Order> findByConsumerIdAndStatusOrderByIdAsc(long consumerId, OrderStatus status);
 
-    List<Order> findByProductIdAndStatus(long productId, OrderStatus status);
+    List<Order> findByProductIdAndStatusOrderByIdAsc(long productId, OrderStatus status);
 
     @Query(value = "select sum(count) from Orders where product_id = :id and status = :status;", nativeQuery = true)
     Integer getOrderedProductAmountByIdAndStatus(@Param("id") long productId, @Param("status") String status);

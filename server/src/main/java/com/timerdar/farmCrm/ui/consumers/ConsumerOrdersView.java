@@ -37,13 +37,12 @@ public class ConsumerOrdersView extends OrdersListView {
 
 
 	private final ConsumerService consumerService;
-	private final OrderService orderService;
 	private final ProductService productService;
 
 	@Autowired
 	public ConsumerOrdersView(ConsumerService consumerService, OrderService orderService, ProductService productService){
+		super(orderService);
 		this.consumerService = consumerService;
-		this.orderService = orderService;
 		this.productService = productService;
 	}
 
@@ -136,13 +135,6 @@ public class ConsumerOrdersView extends OrdersListView {
 				new FormLayout.ResponsiveStep("250px", 4));
 
 		return formLayout;
-	}
-
-	@Override
-	public Component getGridItem(OrderWithNameAndWeightable order) {
-		OrderComponent component = new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
-		component.getStyle().set("overflow-x", "auto");
-		return component;
 	}
 
 	@Override
