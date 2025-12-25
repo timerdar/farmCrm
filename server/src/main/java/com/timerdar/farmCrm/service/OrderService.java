@@ -127,6 +127,13 @@ public class OrderService {
         return consumers;
     }
 
+	public List<Consumer> getCreatedConsumer(){
+		List<Consumer> consumers = new ArrayList<>();
+		for(Long id: orderRepository.getCreatedConsumerIds())
+			consumers.add(consumerService.getConsumerById(id));
+		return consumers;
+	}
+
     public int clearDelivery(){
         int count = 0;
         for (Order order: orderRepository.getDeliveryOrders()) {
