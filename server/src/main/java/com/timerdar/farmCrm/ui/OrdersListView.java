@@ -70,6 +70,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	private void configureGrid(){
 		grid.setEmptyStateComponent(new Div("Заказы не найдены :("));
 		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setHeightFull();
 		grid.setWidthFull();
 		grid.setSelectionMode(Grid.SelectionMode.NONE);

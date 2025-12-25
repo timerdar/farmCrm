@@ -1,13 +1,13 @@
 package com.timerdar.farmCrm.ui;
 
-import com.timerdar.farmCrm.dto.TokenValidationRequest;
 import com.timerdar.farmCrm.service.AuthService;
 import com.timerdar.farmCrm.service.JwtUtil;
 import com.timerdar.farmCrm.ui.consumers.ConsumersView;
+import com.timerdar.farmCrm.ui.current.CurrentOrdersByConsumersView;
+import com.timerdar.farmCrm.ui.current.CurrentOrdersByProductsView;
 import com.timerdar.farmCrm.ui.delivery.DeliveryView;
 import com.timerdar.farmCrm.ui.products.ProductsView;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.tabs.Tab;
@@ -17,11 +17,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinService;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -31,9 +27,9 @@ import java.util.Optional;
 public class MainView extends AppLayout implements AfterNavigationObserver, BeforeEnterObserver {
 
 	private final Tabs tabs;
-	private final Tab currentOrders;
-	private final Tab consumers;
-	private final Tab products;
+	private final Tab currentOrdersProducts;
+	private final Tab currentOrdersConsumers;
+	private final Tab catalog;
 	private final Tab delivery;
 
 	private String COOKIE_NAME = "authToken";
@@ -46,16 +42,16 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 		this.authService = authService;
 		this.jwtUtil = jwtUtil;
 
-		currentOrders = createTab("Текущие", CurrentOrdersView.class);
-		consumers = createTab("Заказчики", ConsumersView.class);
-		products = createTab("Продукция", ProductsView.class);
+		currentOrdersProducts = createTab("Текущие\nпо товарам", CurrentOrdersByProductsView.class);
+		currentOrdersConsumers = createTab("Текущие\nпо заказчикам", CurrentOrdersByConsumersView.class);
+		catalog = createTab("Каталог", CatalogView.class);
 		delivery = createTab("Доставка", DeliveryView.class);
 
-		tabs = new Tabs(currentOrders, consumers, products, delivery);
+		tabs = new Tabs(currentOrdersProducts, currentOrdersConsumers, catalog, delivery);
 		tabs.addThemeVariants(TabsVariant.LUMO_EQUAL_WIDTH_TABS);
 		tabs.getStyle().set("overflow-x", "auto");
 
-		addToNavbar(tabs);
+		addToNavbar(true, tabs);
 
 	}
 
@@ -66,16 +62,16 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Befo
 
 	@Override
 	public void afterNavigation(AfterNavigationEvent event) {
-		String route = event.getLocation().getFirstSegment();
+		String route = event.getLocation().getPath();
 
 		if (route.startsWith("delivery")) {
 			tabs.setSelectedTab(delivery);
-		} else if (route.startsWith("products")) {
-			tabs.setSelectedTab(products);
-		} else if (route.startsWith("consumers")){
-			tabs.setSelectedTab(consumers);
+		} else if (route.startsWith("current") && route.contains("products")) {
+			tabs.setSelectedTab(currentOrdersProducts);
+		} else if (route.startsWith("current") && route.contains("consumers")) {
+			tabs.setSelectedTab(currentOrdersConsumers);
 		} else {
-			tabs.setSelectedTab(currentOrders);
+			tabs.setSelectedTab(catalog);
 		}
 	}
 

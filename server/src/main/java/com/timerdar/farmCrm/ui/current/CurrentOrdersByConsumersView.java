@@ -1,11 +1,13 @@
-package com.timerdar.farmCrm.ui;
+package com.timerdar.farmCrm.ui.current;
 
 import com.timerdar.farmCrm.dto.CreateOrderRequest;
 import com.timerdar.farmCrm.dto.ProductWithOrdersCount;
 import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.model.Product;
-import com.timerdar.farmCrm.service.*;
-import com.timerdar.farmCrm.ui.products.ProductsView;
+import com.timerdar.farmCrm.service.ConsumerService;
+import com.timerdar.farmCrm.service.OrderService;
+import com.timerdar.farmCrm.service.ProductService;
+import com.timerdar.farmCrm.ui.EntitiesListView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
@@ -21,15 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Route("current")
-public class CurrentOrdersView extends EntitiesListView{
+@Route("current/consumers")
+public class CurrentOrdersByConsumersView extends EntitiesListView {
 
 	private final ProductService productService;
 	private final ConsumerService consumerService;
 	private final  OrderService orderService;
 
 	@Autowired
-	public CurrentOrdersView(ProductService productService, ConsumerService consumerService, OrderService orderService){
+	public CurrentOrdersByConsumersView(ProductService productService, ConsumerService consumerService, OrderService orderService){
 		this.consumerService = consumerService;
 		this.productService = productService;
 		this.orderService = orderService;
@@ -41,7 +43,7 @@ public class CurrentOrdersView extends EntitiesListView{
 
 	@Override
 	public List<?> getData() {
-		return productService.getProductsFromCreated();
+		return orderService.getCreatedConsumer();
 	}
 
 	@Override
@@ -108,28 +110,30 @@ public class CurrentOrdersView extends EntitiesListView{
 		grid.setItems(filteredItems(filter));
 	}
 
-	private List<ProductWithOrdersCount> filteredItems(String filter){
-		return 	productService.getProductsList()
-				.stream().filter(product ->
-						product.getName().toLowerCase().contains(filter.toLowerCase()))
+	private List<Consumer> filteredItems(String filter){
+		return 	orderService.getCreatedConsumer()
+				.stream().filter(consumer ->
+						consumer.getName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
 	}
 
 	@Override
-	public Card getEntityCard(Object object) {
-		ProductWithOrdersCount product = (ProductWithOrdersCount) object;
+	public Card getEntityCard(Object object){
+		Consumer consumer = (Consumer) object;
 		Card card = new Card();
-		card.setTitle(product.getName());
-		VerticalLayout subtitle = new VerticalLayout();
-		subtitle.add(
-				new Div("Заказано - " + product.getOrderedCount() + " | Изготовлено - " + product.getCreatedCount())
-		);
-		card.setSubtitle(subtitle);
+		card.setTitle(consumer.getName());
+		VerticalLayout l = new VerticalLayout(
+				new Div(consumer.getAddress()),
+				new Div("Сумма выкупа - " + consumer.getTotalSum() + " руб."));
+		l.setSpacing(false);
+		card.setSubtitle(l);
 		return card;
 	}
+	//TODO переработать current
 
 	@Override
-	public String getEntityId(Object object) {
-		return object instanceof Product ? String.valueOf(((Product) object).getId()) : null;
+	public String getEntityId(Object o) {
+		return o instanceof Consumer ? String.valueOf(((Consumer) o).getId()) : null;
 	}
+
 }
