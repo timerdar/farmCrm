@@ -1,11 +1,11 @@
 :root {
 /* Заменяем основной primary цвет */
 
---lumo-primary-color: #02aca5;
---lumo-contrast-70pct: #004643;
---lumo-primary-text-color: #000;
---lumo-contrast: #004643;
---lumo-error-color: #004643;
+	--lumo-primary-color: #02aca5;
+	--lumo-contrast-70pct: #004643;
+	--lumo-primary-text-color: #000;
+	--lumo-contrast: #004643;
+	--lumo-error-color: #004643;
 
 /* Заменяем error цвет */
   --lumo-error-color-50pct: rgba(244, 67, 54, 0.5); /* красно-прозрачный */
@@ -13,6 +13,9 @@
   --lumo-error-color-90pct: #d32f2f;
 
   --vaadin-grid-cell-padding: 3px;
+  --vaadin-card-padding: 8px;
+
+  --lumo-space-m: 10px;
 }
 
 vaadin-button[theme~="error"] {
