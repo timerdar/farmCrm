@@ -5,7 +5,6 @@ import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -13,20 +12,15 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -199,9 +193,14 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		}));
 
 		menu.addItem("Удалить", e -> e.getItem().ifPresent(order -> {
-			ConfirmDialog confirmDialog = createDialog(order);
+			ConfirmDialog confirmDialog = createDeletingDialog(order);
 			confirmDialog.open();
 		}));
+
+		menu.addItem("ВСЕ в доставку", e -> {
+			ConfirmDialog confirmDialog = createAllDeliveryDialog();
+			confirmDialog.open();
+		});
 	}
 
 	private void changeWeight(long id, double newWeight){
@@ -236,7 +235,12 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		refreshGrid();
 	}
 
-	private ConfirmDialog createDialog(OrderWithNameAndWeightable order){
+	private void groupedToDelivery(){
+		orderService.groupedToDelivery(getData());
+		refreshGrid();
+	}
+
+	private ConfirmDialog createDeletingDialog(OrderWithNameAndWeightable order){
 		ConfirmDialog dialog = new ConfirmDialog();
 
 		dialog.setHeader("Удаление заказа");
@@ -249,10 +253,41 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		dialog.setConfirmText("Удалить");
 		dialog.addConfirmListener(e -> {
 			delete(order);
-			Notification.show("Удален");
+			Notification.show("Удален").setDuration(1000);
 		});
 
 		return dialog;
+	}
+
+	private ConfirmDialog createAllDeliveryDialog(){
+		ConfirmDialog dialog = new ConfirmDialog();
+
+		dialog.setHeader("Уверены, что ВСЕ нужно перенести в доставку?");
+		dialog.setText(new Div(getAllItems()));
+
+		dialog.setCancelable(true);
+		dialog.setCancelText("Отмена");
+		dialog.addCancelListener(e -> e.getSource().close());
+
+		dialog.setConfirmText("Перенести");
+		dialog.addConfirmListener(e -> {
+			groupedToDelivery();
+			Notification.show("Все в доставке").setDuration(1000);
+		});
+
+		return dialog;
+	}
+
+	private String getAllItems(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("Проверьте список: ");
+		for (OrderWithNameAndWeightable order: getData()){
+			sb.append(order.getName()).append(" ").append(order.getCount()).append(" шт");
+			if(order.isWeighed())
+				sb.append(" ").append(order.getWeight()).append(" кг");
+			sb.append("; ");
+		}
+		return sb.toString();
 	}
 }
 

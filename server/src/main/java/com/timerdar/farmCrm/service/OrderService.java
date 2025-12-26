@@ -226,4 +226,13 @@ public class OrderService {
 		productService.deleteProduct(productId);
 	}
 
+	public void groupedToDelivery(List<OrderWithNameAndWeightable> orders){
+		for(OrderWithNameAndWeightable order: orders){
+			OrderChangeRequest req = new OrderChangeRequest();
+			req.setStatus(OrderStatus.DELIVERY.toString());
+			req.setId(order.getId());
+			changeStatus(req);
+		}
+	}
+
 }
