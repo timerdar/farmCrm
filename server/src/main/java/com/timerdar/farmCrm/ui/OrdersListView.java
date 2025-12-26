@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -192,11 +194,13 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		GridContextMenu<OrderWithNameAndWeightable> menu = new GridContextMenu<OrderWithNameAndWeightable>(grid);
 
 		menu.addItem("В доставку", e -> e.getItem().ifPresent(order -> {
-			System.out.println("В доставку перенесен заказ " + order.getId());
+			moveToDelivery(order);
+			Notification.show("В доставку");
 		}));
 
 		menu.addItem("Удалить", e -> e.getItem().ifPresent(order -> {
-			System.out.println("Удален заказ " + order.getId());
+			ConfirmDialog confirmDialog = createDialog(order);
+			confirmDialog.open();
 		}));
 	}
 
@@ -214,6 +218,41 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		req.setAmount(newCount);
 		orderService.changeAmount(req);
 		refreshGrid();
+	}
+
+	private void moveToDelivery(OrderWithNameAndWeightable order){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(order.getId());
+		req.setStatus(OrderStatus.DELIVERY.toString());
+		orderService.changeStatus(req);
+		refreshGrid();
+	}
+
+	private void delete(OrderWithNameAndWeightable order){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(order.getId());
+		req.setStatus(OrderStatus.DELETED.toString());
+		orderService.changeStatus(req);
+		refreshGrid();
+	}
+
+	private ConfirmDialog createDialog(OrderWithNameAndWeightable order){
+		ConfirmDialog dialog = new ConfirmDialog();
+
+		dialog.setHeader("Удаление заказа");
+		dialog.setText("Вы уверены, что готовы удалить заказ " + order.getName() + " " + order.getCount() + " шт");
+
+		dialog.setCancelable(true);
+		dialog.setCancelText("Отмена");
+		dialog.addCancelListener(e -> e.getSource().close());
+
+		dialog.setConfirmText("Удалить");
+		dialog.addConfirmListener(e -> {
+			delete(order);
+			Notification.show("Удален");
+		});
+
+		return dialog;
 	}
 }
 
