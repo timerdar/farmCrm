@@ -1,15 +1,27 @@
 package com.timerdar.farmCrm.ui;
 
+import com.timerdar.farmCrm.dto.OrderChangeRequest;
 import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
+import com.timerdar.farmCrm.model.OrderStatus;
+import com.timerdar.farmCrm.service.OrderService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.popover.Popover;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -26,11 +38,15 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	private Button createOrderButton;
 	private Dialog createOrder;
 
-	@Autowired
-	public OrdersListView(){
-		grid = getGrid();
+	protected final OrderService orderService;
+
+	public OrdersListView(OrderService orderService){
+		this.orderService = orderService;
+
+		createGrid();
 		createOrder = new Dialog();
 		createOrderButton = createOrderButton();
+		createContextMenu();
 
 		setHeightFull();
 		add(createOrder, placeholder, createOrderButton, grid);
@@ -38,7 +54,6 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 
 	public abstract List<OrderWithNameAndWeightable> getData();
 	public abstract Component getEditableEntity(Long id);
-	public abstract Component getGridItem(OrderWithNameAndWeightable order);
 	public abstract Dialog getCreateOrderDialog();
 
 	public void renderEntity() {
@@ -47,16 +62,99 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		placeholder = entity;
 	}
 
-	public Grid<OrderWithNameAndWeightable> getGrid(){
-		Grid<OrderWithNameAndWeightable> grid = new Grid<>();
+	public void createGrid(){
+		grid = new Grid<>();
+		configureGrid();
+		createColumns();
+
+	}
+
+	private void configureGrid(){
 		grid.setEmptyStateComponent(new Div("Заказы не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
+		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setHeightFull();
+		grid.setWidthFull();
 		grid.setSelectionMode(Grid.SelectionMode.NONE);
+	}
 
-		grid.addColumn(new ComponentRenderer<>(this::getGridItem));
+	private void createColumns(){
+		createNameColumn();
+		createCountColumn();
+		createWeightColumn();
+		createCostColumn();
+	}
 
-		return grid;
+	private void createNameColumn(){
+		grid.addColumn(OrderWithNameAndWeightable::getName).setWidth("40%");
+	}
+
+	private void createCountColumn(){
+		grid.addColumn(new ComponentRenderer<>(order -> {
+			Div wrapper = new Div();
+			wrapper.setWidthFull();
+
+			Span text = new Span(order.getCount() + " шт");
+			wrapper.add(text);
+
+			text.addClickListener(e -> {
+				wrapper.removeAll();
+
+				IntegerField field = new IntegerField();
+				field.setWidthFull();
+				field.setRequired(true);
+				field.setValue(order.getCount());
+				wrapper.add(field);
+				field.focus();
+
+				field.addBlurListener(ev -> {
+					changeCount(order.getId(), field.getValue());
+					wrapper.removeAll();
+					wrapper.add(new Span(order.getCount() + " шт"));
+				});
+			});
+
+			return wrapper;
+		})).setWidth("20%");
+	}
+
+	private void createWeightColumn(){
+		grid.addColumn(new ComponentRenderer<>(order -> {
+			Div wrapper = new Div();
+			wrapper.setWidthFull();
+
+			Span text = new Span(order.isWeighed() ? order.getWeight() + " кг" : "-");
+			wrapper.add(text);
+
+			if(order.isWeighed()) {
+				text.addClickListener(e -> {
+					wrapper.removeAll();
+
+					NumberField field = new NumberField();
+					field.setWidthFull();
+					field.setRequired(true);
+					field.setValue(order.getWeight());
+					wrapper.add(field);
+					field.focus();
+
+					field.addBlurListener(ev -> {
+						changeWeight(order.getId(), field.getValue());
+						wrapper.removeAll();
+						wrapper.add(new Span(order.getWeight() + " кг"));
+					});
+
+				});
+			}
+
+			return wrapper;
+		})).setWidth("20%");
+	}
+
+	private void createCostColumn(){
+		grid.addColumn(new ComponentRenderer<>(item -> {
+					Span span = new Span(item.getCost() + " руб.");
+					return span;
+		})).setWidth("20%");
 	}
 
 	public void refreshGrid(){
@@ -92,4 +190,69 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		return button;
 	}
 
+	public void createContextMenu(){
+		GridContextMenu<OrderWithNameAndWeightable> menu = new GridContextMenu<OrderWithNameAndWeightable>(grid);
+
+		menu.addItem("В доставку", e -> e.getItem().ifPresent(order -> {
+			moveToDelivery(order);
+			Notification.show("В доставку");
+		}));
+
+		menu.addItem("Удалить", e -> e.getItem().ifPresent(order -> {
+			ConfirmDialog confirmDialog = createDialog(order);
+			confirmDialog.open();
+		}));
+	}
+
+	private void changeWeight(long id, double newWeight){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(id);
+		req.setWeight(newWeight);
+		orderService.changeWeight(req);
+		refreshGrid();
+	}
+
+	private void changeCount(long id, int newCount){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(id);
+		req.setAmount(newCount);
+		orderService.changeAmount(req);
+		refreshGrid();
+	}
+
+	private void moveToDelivery(OrderWithNameAndWeightable order){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(order.getId());
+		req.setStatus(OrderStatus.DELIVERY.toString());
+		orderService.changeStatus(req);
+		refreshGrid();
+	}
+
+	private void delete(OrderWithNameAndWeightable order){
+		OrderChangeRequest req = new OrderChangeRequest();
+		req.setId(order.getId());
+		req.setStatus(OrderStatus.DELETED.toString());
+		orderService.changeStatus(req);
+		refreshGrid();
+	}
+
+	private ConfirmDialog createDialog(OrderWithNameAndWeightable order){
+		ConfirmDialog dialog = new ConfirmDialog();
+
+		dialog.setHeader("Удаление заказа");
+		dialog.setText("Вы уверены, что готовы удалить заказ " + order.getName() + " " + order.getCount() + " шт");
+
+		dialog.setCancelable(true);
+		dialog.setCancelText("Отмена");
+		dialog.addCancelListener(e -> e.getSource().close());
+
+		dialog.setConfirmText("Удалить");
+		dialog.addConfirmListener(e -> {
+			delete(order);
+			Notification.show("Удален");
+		});
+
+		return dialog;
+	}
 }
+

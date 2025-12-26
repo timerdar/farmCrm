@@ -37,12 +37,11 @@ import java.util.List;
 public class ProductOrdersView extends OrdersListView {
 
 	private final ProductService productService;
-	private final OrderService orderService;
 	private final ConsumerService consumerService;
 
 	@Autowired
 	public ProductOrdersView(OrderService orderService, ProductService productService, ConsumerService consumerService){
-		this.orderService = orderService;
+		super(orderService);
 		this.productService = productService;
 		this.consumerService = consumerService;
 	}
@@ -137,13 +136,6 @@ public class ProductOrdersView extends OrdersListView {
 		);
 
 		return card;
-	}
-
-	@Override
-	public Component getGridItem(OrderWithNameAndWeightable order) {
-		OrderComponent component = new OrderComponent(order, orderService, this::renderEntity, this::refreshGrid);
-		component.getStyle().set("overflow-x", "auto");
-		return component;
 	}
 
 	@Override

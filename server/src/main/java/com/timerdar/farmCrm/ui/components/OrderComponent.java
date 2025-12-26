@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 
@@ -26,6 +27,8 @@ public class OrderComponent extends HorizontalLayout {
 	private Button countSaveButton;          // Кнопка сохранения edit
 	private Button weightSaveButton;          // Кнопка сохранения edit
 	private final Span costLabel;
+	private final HorizontalLayout firstRow = new HorizontalLayout();
+	private final HorizontalLayout secondRow = new HorizontalLayout();
 
 	private long id;
 	private int count;
@@ -58,7 +61,15 @@ public class OrderComponent extends HorizontalLayout {
 		setAlignItems(Alignment.CENTER);
 		setPadding(false);
 
+		firstRow.setWidthFull();
+		firstRow.setAlignItems(Alignment.CENTER);
+		secondRow.setWidthFull();
+		secondRow.setJustifyContentMode(JustifyContentMode.AROUND);
+
 		nameLabel = new Span(name);
+		nameLabel.getStyle().set("overflow-wrap", "word-break");
+
+		nameLabel.getStyle().setMarginLeft("8px");
 
 		costLabel = new Span(String.format("%d руб.", cost));
 
@@ -83,6 +94,9 @@ public class OrderComponent extends HorizontalLayout {
 		countSaveButton.addClickListener(e -> updateMainEntity.run());
 
 		add(nameLabel, countDisplay, countEditor, countSaveButton);
+		//firstRow.add(nameLabel, countDisplay, countEditor, countSaveButton);
+		//firstRow.setFlexGrow(1f, nameLabel, countDisplay);
+
 
 		if(isWeighed){
 			weightDisplay = new Div();
@@ -101,6 +115,8 @@ public class OrderComponent extends HorizontalLayout {
 			weightSaveButton.addClickListener(e -> updateMainEntity.run());
 
 			add(weightDisplay, weightEditor, weightSaveButton);
+			//firstRow.add(weightDisplay, weightEditor, weightSaveButton);
+			//firstRow.setFlexGrow(1f, weightDisplay);
 		}
 
 		if(order.getStatus() == OrderStatus.CREATED){
@@ -123,6 +139,10 @@ public class OrderComponent extends HorizontalLayout {
 			deleteButton.addClickListener(e -> dialog.open());
 
 			add(costLabel, actionButton, deleteButton);
+			//firstRow.add(costLabel);
+			//secondRow.add(actionButton, deleteButton);
+			//firstRow.setFlexGrow(1f, costLabel);
+
 		} else {
 
 			Button actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
@@ -140,6 +160,9 @@ public class OrderComponent extends HorizontalLayout {
 			});
 
 			add(costLabel, done, actionButton);
+			//firstRow.add(costLabel);
+			//firstRow.setFlexGrow(1f, costLabel);
+			//secondRow.add(done, actionButton);
 		}
 	}
 

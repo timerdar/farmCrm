@@ -67,11 +67,11 @@ public class OrderService {
     }
 
     public List<Order> getOrdersOfConsumer(long consumerId, OrderStatus status){
-        return orderRepository.findByConsumerIdAndStatus(consumerId, status);
+        return orderRepository.findByConsumerIdAndStatusOrderByIdAsc(consumerId, status);
     }
 
     public List<Order> getOrdersOfProduct(long productId, OrderStatus status){
-        return orderRepository.findByProductIdAndStatus(productId, status);
+        return orderRepository.findByProductIdAndStatusOrderByIdAsc(productId, status);
     }
 
     public Order changeStatus(OrderChangeRequest request){
@@ -126,6 +126,13 @@ public class OrderService {
         }
         return consumers;
     }
+
+	public List<Consumer> getCreatedConsumer(){
+		List<Consumer> consumers = new ArrayList<>();
+		for(Long id: orderRepository.getCreatedConsumerIds())
+			consumers.add(consumerService.getConsumerById(id));
+		return consumers;
+	}
 
     public int clearDelivery(){
         int count = 0;

@@ -124,11 +124,11 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 			RouteParameters routeParameters =
 					new RouteParameters("id", getEntityId(e.getItem()));
 
-			if (simple.startsWith("Product") || simple.startsWith("Current")) {
+			if (simple.startsWith("Product") || simple.startsWith("CurrentOrdersByProducts")) {
 				UI.getCurrent().navigate(
 						ProductOrdersView.class,
 						routeParameters);
-			} else if (simple.startsWith("Consumer")) {
+			} else if (simple.startsWith("Consumer") || simple.startsWith("CurrentOrdersByConsumers")) {
 				UI.getCurrent().navigate(
 						ConsumerOrdersView.class,
 						routeParameters
