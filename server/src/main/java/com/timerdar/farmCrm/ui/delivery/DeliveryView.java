@@ -3,6 +3,7 @@ package com.timerdar.farmCrm.ui.delivery;
 import com.timerdar.farmCrm.dto.ConsumerWithOrders;
 import com.timerdar.farmCrm.dto.DeliveryOrderNumForConsumer;
 import com.timerdar.farmCrm.dto.DeliverySummaryItem;
+import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.ui.MainView;
@@ -22,18 +23,23 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Route(value = "delivery", layout = MainView.class)
 public class DeliveryView extends VerticalLayout {
 
+	private Component search;
 	private final Grid<ConsumerWithOrders> grid;
 	private final Dialog summaryDialog = new Dialog();
 	private final OrderService orderService;
@@ -49,6 +55,7 @@ public class DeliveryView extends VerticalLayout {
 		setAlignItems(Alignment.CENTER);
 		setSpacing(false);
 
+		search = getSearchBox();
 		grid = getGrid();
 		Button copy = getBillCopyButton();
 		Button b = getSummaryButton();
@@ -57,7 +64,7 @@ public class DeliveryView extends VerticalLayout {
 		setHeightFull();
 
 		refreshGrid();
-		add(summaryDialog, copy, b, clean, reorder, grid);
+		add(search, summaryDialog, copy, b, clean, reorder, grid);
 	}
 
 	private Grid<ConsumerWithOrders> getGrid(){
@@ -78,6 +85,16 @@ public class DeliveryView extends VerticalLayout {
 
 	private void refreshGrid(){
 		grid.setItems(getData());
+	}
+
+	public void filterGrid(String filter) {
+		this.grid.setItems(filteredItems(filter));
+	}
+
+	private List<ConsumerWithOrders> filteredItems(String filter) {
+		return getData().stream().filter(consumerWithOrders ->
+				consumerWithOrders.getName().toLowerCase().contains(filter.toLowerCase())
+		).collect(Collectors.toList());
 	}
 
 	private List<ConsumerWithOrders> getData(){
@@ -237,5 +254,23 @@ public class DeliveryView extends VerticalLayout {
 
 	private String getReorderGridItem(ConsumerWithOrders consumerWithOrders){
 		return consumerWithOrders.getName() + " " + consumerWithOrders.getAddress();
+	}
+
+	public HorizontalLayout getSearchBox(){
+		HorizontalLayout search = new HorizontalLayout();
+
+		TextField searchField = new TextField();
+		searchField.setPlaceholder("Введите имя");
+		searchField.setWidthFull();
+		searchField.setValueChangeMode(ValueChangeMode.EAGER);
+		searchField.addValueChangeListener(e ->
+				filterGrid(e.getValue()));
+
+		search.add(new Icon(VaadinIcon.SEARCH));
+		search.add(searchField);
+		search.setWidthFull();
+		search.setAlignItems(Alignment.CENTER);
+
+		return search;
 	}
 }
