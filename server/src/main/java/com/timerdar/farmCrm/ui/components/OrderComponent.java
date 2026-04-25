@@ -79,7 +79,7 @@ public class OrderComponent extends HorizontalLayout {
 		weightSaveButton.setVisible(false);
 
 		countDisplay = new Div();
-		countDisplay.setText(String.format("%d шт.", count));
+		countDisplay.setText(String.format("%.2f шт.", count));
 		countDisplay.getStyle().set("cursor", "pointer");
 		countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
 
@@ -208,7 +208,7 @@ public class OrderComponent extends HorizontalLayout {
 		this.weight = order.getWeight();
 
 		costLabel.setText(String.format("%d руб.", cost));
-		countDisplay.setText(String.format("%d шт.", count));
+		countDisplay.setText(String.format("%.2f шт.", count));
 		if (weightDisplay != null)
 			weightDisplay.setText(String.format("%.3f кг.", weight));
 		updateMainEntity.run();
