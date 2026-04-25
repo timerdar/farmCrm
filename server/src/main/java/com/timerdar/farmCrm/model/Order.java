@@ -20,7 +20,7 @@ public class Order {
     private long id;
     private long productId;
     private long consumerId;
-    private int count;
+    private double count;
     private int cost;
     private double weight;
     @Enumerated(EnumType.STRING)

@@ -21,7 +21,7 @@ public class OrderComponent extends HorizontalLayout {
 
 	private Span nameLabel;
 	private Div countDisplay;        // Отображение количества
-	private IntegerField countEditor; // Редактируемое поле количества
+	private NumberField countEditor; // Редактируемое поле количества
 	private Div weightDisplay;
 	private NumberField weightEditor;
 	private Button countSaveButton;          // Кнопка сохранения edit
@@ -31,7 +31,7 @@ public class OrderComponent extends HorizontalLayout {
 	private final HorizontalLayout secondRow = new HorizontalLayout();
 
 	private long id;
-	private int count;
+	private double count;
 	private OrderStatus status;
 	private double weight;
 	private boolean isWeighed;
@@ -83,7 +83,7 @@ public class OrderComponent extends HorizontalLayout {
 		countDisplay.getStyle().set("cursor", "pointer");
 		countDisplay.getElement().addEventListener("click", e -> enableEditingCount());
 
-		countEditor = new IntegerField();
+		countEditor = new NumberField();
 		countEditor.setPlaceholder("ШТ:");
 		countEditor.setMin(0);
 		countEditor.setValue(count);

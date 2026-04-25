@@ -10,7 +10,7 @@ import lombok.Setter;
 public class CreateOrderRequest {
     private long productId;
     private long consumerId;
-    private int amount;
+    private double amount;
 
     @JsonIgnore
     public boolean isFullyEntered(){

@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -72,7 +73,7 @@ public class CurrentOrdersByConsumersView extends EntitiesListView {
 		productChooser.setLabel("Продукт");
 		productChooser.setWidthFull();
 
-		IntegerField count = new IntegerField("Количество");
+		NumberField count = new NumberField("Количество");
 		count.setMin(0);
 		count.setRequired(true);
 		count.setPlaceholder("ШТ:");

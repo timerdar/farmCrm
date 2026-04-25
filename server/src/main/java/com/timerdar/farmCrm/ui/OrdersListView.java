@@ -94,7 +94,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 			text.addClickListener(e -> {
 				wrapper.removeAll();
 
-				IntegerField field = new IntegerField();
+				NumberField field = new NumberField();
 				field.setWidthFull();
 				field.setRequired(true);
 				field.setValue(order.getCount());
@@ -211,7 +211,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		refreshGrid();
 	}
 
-	private void changeCount(long id, int newCount){
+	private void changeCount(long id, double newCount){
 		OrderChangeRequest req = new OrderChangeRequest();
 		req.setId(id);
 		req.setAmount(newCount);

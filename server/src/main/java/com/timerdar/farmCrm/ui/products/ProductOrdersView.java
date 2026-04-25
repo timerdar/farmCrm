@@ -155,7 +155,7 @@ public class ProductOrdersView extends OrdersListView {
 		consumerChooser.setLabel("Заказчик");
 		consumerChooser.setWidthFull();
 
-		IntegerField count = new IntegerField("Количество");
+		NumberField count = new NumberField("Количество");
 		count.setMin(0);
 		count.setRequired(true);
 		count.setPlaceholder("ШТ:");

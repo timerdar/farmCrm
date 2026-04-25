@@ -152,11 +152,11 @@ public class DeliveryView extends VerticalLayout {
 		summaryDialog.removeAll();
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.add(new Text("Ниже представлены позиции и количество заказанных и изготовленных"));
+		layout.add(new Text("Ниже представлены позиции и количество заказанных/изготовленных"));
 
 
 		for(DeliverySummaryItem item : orderService.getDeliverySummary()){
-			layout.add(new Div(item.getProductName() + " - Заказано " + item.getOrderedCount() + " - Изготовлено " + item.getCreatedCount()));
+			layout.add(new Div(item.getProductName() + " " + item.getOrderedCount() + "/" + item.getCreatedCount()));
 		}
 
 		summaryDialog.add(layout);

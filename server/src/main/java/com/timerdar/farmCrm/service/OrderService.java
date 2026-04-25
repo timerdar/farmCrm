@@ -108,7 +108,7 @@ public class OrderService {
             cost = (int) (product.getCost() * order.getWeight());
             log.info("Пересчет стоимости заказа с весом: orderId = {}, product = {}, newCost = {}", id, product.getName(), cost);
         }else{
-            cost = (product.getCost() * order.getCount());
+            cost = (int)(product.getCost() * order.getCount());
             log.info("Пересчет стоимости штучного заказа: orderId = {}, product = {}, newCost = {}", id, product.getName(), cost);
         }
         order.setCost(cost);
