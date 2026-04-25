@@ -105,14 +105,7 @@ public class CurrentOrdersByProductsView extends EntitiesListView {
 
 	@Override
 	public void filterGrid(String filter) {
-		grid.setItems(filteredItems(filter));
-	}
-
-	private List<ProductWithOrdersCount> filteredItems(String filter){
-		return 	productService.getProductsList()
-				.stream().filter(product ->
-						product.getName().toLowerCase().contains(filter.toLowerCase()))
-				.collect(Collectors.toList());
+		this.dataView.setFilter(item -> ((Product)item).getName().toLowerCase().contains(filter.toLowerCase()));
 	}
 
 	@Override

@@ -107,14 +107,7 @@ public class CurrentOrdersByConsumersView extends EntitiesListView {
 
 	@Override
 	public void filterGrid(String filter) {
-		grid.setItems(filteredItems(filter));
-	}
-
-	private List<Consumer> filteredItems(String filter){
-		return 	orderService.getCreatedConsumer()
-				.stream().filter(consumer ->
-						consumer.getName().toLowerCase().contains(filter.toLowerCase()))
-				.collect(Collectors.toList());
+		this.dataView.setFilter(item -> ((Consumer)item).getName().toLowerCase().contains(filter.toLowerCase()));
 	}
 
 	@Override
