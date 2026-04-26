@@ -14,6 +14,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -149,6 +150,7 @@ public class DeliveryView extends VerticalLayout {
 
 	private void renderSummaryDialog(){
 		summaryDialog.setHeaderTitle("Сводка по заказанным продукциям");
+		summaryDialog.getFooter().removeAll();
 		summaryDialog.removeAll();
 
 		VerticalLayout layout = new VerticalLayout();
@@ -156,7 +158,10 @@ public class DeliveryView extends VerticalLayout {
 
 
 		for(DeliverySummaryItem item : orderService.getDeliverySummary()){
-			layout.add(new Div(item.getProductName() + " " + item.getOrderedCount() + "/" + item.getCreatedCount()));
+			Details details = new Details(item.getProductName() + " " + item.getOrderedCount() + "/" + item.getCreatedCount());
+			for(String consumerName : item.getConsumers().keySet())
+				details.add(new Div(consumerName + " " + item.getConsumers().get(consumerName) + " шт."));
+			layout.add(new Div(details));
 		}
 
 		summaryDialog.add(layout);

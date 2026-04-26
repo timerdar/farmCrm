@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -157,9 +158,15 @@ public class OrderService {
         List<Product> products = productService.getProductsFromDelivery();
         List<DeliverySummaryItem> res = new ArrayList<>();
         for (Product product: products){
+			List<OrderWithNameAndWeightable> orders = getOrdersWithName(product.getId(), "products", OrderStatus.DELIVERY.toString());
+			HashMap<String, Double> consumers = new HashMap<>();
+			for(OrderWithNameAndWeightable order : orders){
+				consumers.put(order.getName(), order.getCount());
+			}
             res.add(new DeliverySummaryItem(product.getName(),
                     product.getCreatedCount(),
-                    getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE)));
+                    getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE),
+					consumers));
         }
 		log.info("Получение сводки доставки");
         return res;
