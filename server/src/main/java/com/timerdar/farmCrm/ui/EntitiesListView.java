@@ -11,6 +11,7 @@ import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -19,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.DataView;
+import com.vaadin.flow.data.provider.ListDataView;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
@@ -35,7 +37,7 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 	private Dialog creationDialog;
 	private Component creationButton;
 	protected Grid grid;
-	protected DataView dataView;
+	protected ListDataView dataView = null;
 
 	private int savedScrollIndex = 0;
 
@@ -59,7 +61,7 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 	abstract public String getEntityId(Object object);
 
 	public void refreshGrid(){
-		dataView = grid.setItems(getData());
+		this.dataView = grid.setItems(getData());
 
 		if (savedScrollIndex > 0) {
 			grid.scrollToIndex(savedScrollIndex);
@@ -79,7 +81,7 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 		TextField searchField = new TextField();
 		searchField.setPlaceholder("Введите имя");
 		searchField.setWidthFull();
-		searchField.setValueChangeMode(ValueChangeMode.EAGER);
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
 		searchField.addValueChangeListener(e ->
 				filterGrid(e.getValue()));
 

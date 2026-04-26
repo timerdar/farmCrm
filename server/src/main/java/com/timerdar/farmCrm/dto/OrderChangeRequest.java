@@ -8,7 +8,7 @@ public class OrderChangeRequest {
 
     private long id;
     private double cost;
-    private int amount;
+    private double amount;
     private double weight;
     private String status;
 

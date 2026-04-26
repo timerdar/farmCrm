@@ -75,14 +75,7 @@ public class ProductsView extends EntitiesListView {
 
 	@Override
 	public void filterGrid(String filter) {
-		grid.setItems(filteredItems(filter));
-	}
-
-	private List<Product> filteredItems(String filter){
-		return 	productService.getProductsList()
-						.stream().filter(consumer ->
-								consumer.getName().toLowerCase().contains(filter.toLowerCase()))
-						.collect(Collectors.toList());
+		this.dataView.setFilter(item -> ((Product)item).getName().toLowerCase().contains(filter.toLowerCase()));
 	}
 
 	@Override

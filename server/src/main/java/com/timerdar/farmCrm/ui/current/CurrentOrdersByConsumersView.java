@@ -17,6 +17,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -72,7 +73,7 @@ public class CurrentOrdersByConsumersView extends EntitiesListView {
 		productChooser.setLabel("Продукт");
 		productChooser.setWidthFull();
 
-		IntegerField count = new IntegerField("Количество");
+		NumberField count = new NumberField("Количество");
 		count.setMin(0);
 		count.setRequired(true);
 		count.setPlaceholder("ШТ:");
@@ -107,14 +108,7 @@ public class CurrentOrdersByConsumersView extends EntitiesListView {
 
 	@Override
 	public void filterGrid(String filter) {
-		grid.setItems(filteredItems(filter));
-	}
-
-	private List<Consumer> filteredItems(String filter){
-		return 	orderService.getCreatedConsumer()
-				.stream().filter(consumer ->
-						consumer.getName().toLowerCase().contains(filter.toLowerCase()))
-				.collect(Collectors.toList());
+		this.dataView.setFilter(item -> ((Consumer)item).getName().toLowerCase().contains(filter.toLowerCase()));
 	}
 
 	@Override

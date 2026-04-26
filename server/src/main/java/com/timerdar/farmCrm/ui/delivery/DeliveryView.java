@@ -14,6 +14,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -42,10 +43,15 @@ public class DeliveryView extends VerticalLayout {
 	private Component search;
 	private final Grid<ConsumerWithOrders> grid;
 	private final Dialog summaryDialog = new Dialog();
+	private final Dialog reorderDialog = new Dialog("Изменение порядка доставки");
+	private final Dialog copyDialog = new Dialog();
+
 	private final OrderService orderService;
 	private final ConsumerService consumerService;
 
 	private ConsumerWithOrders draggedItem;
+
+	private GridListDataView<ConsumerWithOrders> dataView = null;
 
 	@Autowired
 	public DeliveryView(OrderService orderService, ConsumerService consumerService){
@@ -79,22 +85,17 @@ public class DeliveryView extends VerticalLayout {
 		return grid;
 	}
 
+	//TODO Оптимизировать (сделать загрузку только после открытия заказчика, а не при загрузке страницы)
 	private Component getGridItem(ConsumerWithOrders consumerWithOrders){
 		return new ConsumerWithOrdersComponent(consumerWithOrders, this.orderService);
 	}
 
 	private void refreshGrid(){
-		grid.setItems(getData());
+		this.dataView = grid.setItems(getData());
 	}
 
 	public void filterGrid(String filter) {
-		this.grid.setItems(filteredItems(filter));
-	}
-
-	private List<ConsumerWithOrders> filteredItems(String filter) {
-		return getData().stream().filter(consumerWithOrders ->
-				consumerWithOrders.getName().toLowerCase().contains(filter.toLowerCase())
-		).collect(Collectors.toList());
+		this.dataView.setFilter(item -> item.getName().toLowerCase().contains(filter.toLowerCase()));
 	}
 
 	private List<ConsumerWithOrders> getData(){
@@ -106,7 +107,15 @@ public class DeliveryView extends VerticalLayout {
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setWidthFull();
 
-		Dialog copyDialog = new Dialog();
+		button.addClickListener(e -> {
+			renderBillCopyDialog();
+			copyDialog.open();
+		});
+
+		return button;
+	}
+
+	private void renderBillCopyDialog() {
 		VerticalLayout layout = new VerticalLayout();
 		layout.add(new Div("Для копирования нажмите на текст (он сам выделится) и скопируйте его"));
 		TextArea textArea = new TextArea("Чеки доставки");
@@ -116,19 +125,16 @@ public class DeliveryView extends VerticalLayout {
 		textArea.setReadOnly(true);
 
 		layout.addClickListener(e ->
-			UI.getCurrent().getPage().executeJs(
-					"var textarea = document.querySelector('vaadin-text-area textarea');" +
-							"textarea.select();"
-			)
+				UI.getCurrent().getPage().executeJs(
+						"var textarea = document.querySelector('vaadin-text-area textarea');" +
+								"textarea.select();"
+				)
 		);
 
 		Button close = new Button(new Icon(VaadinIcon.CLOSE), e -> copyDialog.close());
 
 		layout.add(textArea);
 		copyDialog.add(layout, close);
-		button.addClickListener(e -> copyDialog.open());
-
-		return button;
 	}
 
 	private Button getSummaryButton(){
@@ -144,14 +150,18 @@ public class DeliveryView extends VerticalLayout {
 
 	private void renderSummaryDialog(){
 		summaryDialog.setHeaderTitle("Сводка по заказанным продукциям");
+		summaryDialog.getFooter().removeAll();
 		summaryDialog.removeAll();
 
 		VerticalLayout layout = new VerticalLayout();
-		layout.add(new Text("Ниже представлены позиции и количество заказанных и изготовленных"));
+		layout.add(new Text("Ниже представлены позиции и количество заказанных/изготовленных"));
 
 
 		for(DeliverySummaryItem item : orderService.getDeliverySummary()){
-			layout.add(new Div(item.getProductName() + " - Заказано " + item.getOrderedCount() + " - Изготовлено " + item.getCreatedCount()));
+			Details details = new Details(item.getProductName() + " " + item.getOrderedCount() + "/" + item.getCreatedCount());
+			for(String consumerName : item.getConsumers().keySet())
+				details.add(new Div(consumerName + " " + item.getConsumers().get(consumerName) + " шт."));
+			layout.add(new Div(details));
 		}
 
 		summaryDialog.add(layout);
@@ -185,10 +195,16 @@ public class DeliveryView extends VerticalLayout {
 		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		button.setWidthFull();
 
-		Dialog reorderDialog = new Dialog("Изменение порядка доставки");
-		reorderDialog.getElement().getClassList().add("custom-dialog-class");
+		button.addClickListener(e -> {
+			renderReorderDialog();
+			reorderDialog.open();
+		});
 
-		button.addClickListener(e -> reorderDialog.open());
+		return button;
+	}
+
+	private void renderReorderDialog() {
+		reorderDialog.getElement().getClassList().add("custom-dialog-class");
 
 		VerticalLayout dialogLayout = new VerticalLayout();
 		dialogLayout.add(new Div("Для изменения порядка зажмите строчку с заказчиком и перенесите в нужное место"));
@@ -219,7 +235,6 @@ public class DeliveryView extends VerticalLayout {
 			}else{
 				dataView.addItemBefore(draggedItem, targetConsumer);
 			}
-			//System.out.println(dataView.getItems().toList());
 		});
 
 		reorderGrid.addDragEndListener(e -> {
@@ -232,7 +247,7 @@ public class DeliveryView extends VerticalLayout {
 		reorderDialog.add(dialogLayout);
 
 		Button close = new Button("Отмена", e ->
-			reorderDialog.close()
+				reorderDialog.close()
 		);
 		close.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
@@ -248,10 +263,7 @@ public class DeliveryView extends VerticalLayout {
 		});
 		accept.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 		reorderDialog.getFooter().add(close, accept);
-
-		return button;
 	}
-
 	private String getReorderGridItem(ConsumerWithOrders consumerWithOrders){
 		return consumerWithOrders.getName() + " " + consumerWithOrders.getAddress();
 	}
@@ -262,7 +274,7 @@ public class DeliveryView extends VerticalLayout {
 		TextField searchField = new TextField();
 		searchField.setPlaceholder("Введите имя");
 		searchField.setWidthFull();
-		searchField.setValueChangeMode(ValueChangeMode.EAGER);
+		searchField.setValueChangeMode(ValueChangeMode.LAZY);
 		searchField.addValueChangeListener(e ->
 				filterGrid(e.getValue()));
 
