@@ -69,7 +69,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setHeightFull();
 		grid.setWidthFull();
-		grid.setSelectionMode(Grid.SelectionMode.NONE);
+		grid.setSelectionMode(Grid.SelectionMode.MULTI);
 	}
 
 	private void createColumns(){
@@ -188,7 +188,9 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		GridContextMenu<OrderWithNameAndWeightable> menu = new GridContextMenu<OrderWithNameAndWeightable>(grid);
 
 		menu.addItem("В доставку", e -> e.getItem().ifPresent(order -> {
-			moveToDelivery(order);
+			for(OrderWithNameAndWeightable selectedOrder : grid.asMultiSelect().getValue())
+				moveToDelivery(selectedOrder);
+			refreshGrid();
 			Notification.show("В доставку");
 		}));
 
@@ -224,7 +226,6 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		req.setId(order.getId());
 		req.setStatus(OrderStatus.DELIVERY.toString());
 		orderService.changeStatus(req);
-		refreshGrid();
 	}
 
 	private void delete(OrderWithNameAndWeightable order){
