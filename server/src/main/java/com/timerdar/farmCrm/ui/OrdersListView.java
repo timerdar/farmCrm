@@ -4,7 +4,9 @@ import com.timerdar.farmCrm.dto.OrderChangeRequest;
 import com.timerdar.farmCrm.dto.OrderWithNameAndWeightable;
 import com.timerdar.farmCrm.model.OrderStatus;
 import com.timerdar.farmCrm.service.OrderService;
+import com.timerdar.farmCrm.ui.products.ProductOrdersView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -21,7 +23,9 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Location;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class OrdersListView extends VerticalLayout implements BeforeEnterObserver {
@@ -203,6 +207,14 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 			ConfirmDialog confirmDialog = createAllDeliveryDialog();
 			confirmDialog.open();
 		});
+
+		menu.addItem("Посмотреть все заказы", e -> e.getItem().ifPresent(order -> {
+			Location currentLocation = UI.getCurrent().getInternals().getActiveViewLocation();
+			List<String> segments = currentLocation.getSegments();
+
+			boolean isProducts = segments.get(0).equals("products");
+			UI.getCurrent().navigate(isProducts ? "consumers/" + order.getConsumerId() + "/orders" : "products/" + order.getProductId() + "/orders");
+		}));
 	}
 
 	private void changeWeight(long id, double newWeight){
