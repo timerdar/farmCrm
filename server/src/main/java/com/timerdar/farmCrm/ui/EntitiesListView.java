@@ -7,7 +7,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -19,9 +18,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.ListDataView;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 
@@ -57,7 +55,7 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 	abstract public List<?> getData();
 	abstract public Dialog getDialog();
 	abstract public void filterGrid(String filter);
-	abstract public Card getEntityCard(Object object);
+	abstract public ListRow describeEntity(Object object);
 	abstract public String getEntityId(Object object);
 
 	public void refreshGrid(){
@@ -138,9 +136,24 @@ public abstract class EntitiesListView extends VerticalLayout implements BeforeE
 			}
 		});
 		grid.addClassName("flexible-grid");
-
-		grid.addColumn(new ComponentRenderer<>(this::getEntityCard));
+		grid.addColumn(LitRenderer.<Object>of(
+				"<div class=\"entity-row\">" +
+						"<div class=\"entity-row__title\">${item.title}</div>" +
+						"<div class=\"entity-row__line\">${item.primary}</div>" +
+						"<div class=\"entity-row__line\">${item.secondary}</div>" +
+						"</div>")
+				.withProperty("title", item -> describeEntity(item).title())
+				.withProperty("primary", item -> describeEntity(item).primary())
+				.withProperty("secondary", item -> describeEntity(item).secondary()));
 		return grid;
+	}
+
+	public record ListRow(String title, String primary, String secondary) {
+		public ListRow {
+			title = title == null ? "" : title;
+			primary = primary == null ? "" : primary;
+			secondary = secondary == null ? "" : secondary;
+		}
 	}
 
 	public void setDialog(Dialog newCreationDialog){

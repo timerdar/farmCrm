@@ -8,10 +8,8 @@ import com.timerdar.farmCrm.service.*;
 import com.timerdar.farmCrm.ui.EntitiesListView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -110,16 +108,12 @@ public class CurrentOrdersByProductsView extends EntitiesListView {
 	}
 
 	@Override
-	public Card getEntityCard(Object object) {
+	public ListRow describeEntity(Object object) {
 		ProductWithOrdersCount product = (ProductWithOrdersCount) object;
-		Card card = new Card();
-		card.setTitle(product.getName());
-		VerticalLayout subtitle = new VerticalLayout();
-		subtitle.add(
-				new Div("Заказано - " + product.getOrderedCount() + " | Изготовлено - " + product.getCreatedCount())
-		);
-		card.setSubtitle(subtitle);
-		return card;
+		return new ListRow(
+				product.getName(),
+				"Заказано - " + product.getOrderedCount() + " | Изготовлено - " + product.getCreatedCount(),
+				"");
 	}
 
 	@Override

@@ -13,7 +13,11 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter @Getter
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+		@Index(name = "idx_orders_status", columnList = "status"),
+		@Index(name = "idx_orders_consumer_status", columnList = "consumer_id, status"),
+		@Index(name = "idx_orders_product_status", columnList = "product_id, status")
+})
 public class Order {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

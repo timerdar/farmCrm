@@ -32,12 +32,35 @@ vaadin-button[theme~="error"] {
 }
 
 .flexible-grid::part(body-cell) {
-    height: auto;
-    min-height: 110px;
-    padding: 8px !important;
-    overflow: visible !important;
+    padding: 8px;
+    overflow: hidden;
 }
 
-.flexible-grid::part(row) {
-    height: auto !important;
+.entity-row {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    height: 72px;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
+.entity-row__title {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.entity-row__line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--lumo-font-size-s);
+}
+
+.cell-action {
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }

@@ -5,6 +5,9 @@ import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.shared.ui.Transport;
 
+// Long polling остаётся: на мобильной сети WebSocket обрывается, а WEBSOCKET_XHR
+// на long polling сам не переходит. Время одного poll ограничено в application.properties,
+// чтобы оборванный запрос не держал экран до очистки кэша.
 @Push(transport = Transport.LONG_POLLING)
 @PWA(
 		name = "Система учета заказов на фермерскую продукцию",

@@ -1,9 +1,8 @@
 package com.timerdar.farmCrm.ui.delivery;
 
-import com.timerdar.farmCrm.dto.ConsumerWithOrders;
 import com.timerdar.farmCrm.dto.DeliveryOrderNumForConsumer;
+import com.timerdar.farmCrm.dto.DeliveryStop;
 import com.timerdar.farmCrm.dto.DeliverySummaryItem;
-import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.ui.MainView;
@@ -17,7 +16,6 @@ import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.dnd.GridDropLocation;
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
@@ -25,23 +23,22 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Route(value = "delivery", layout = MainView.class)
 public class DeliveryView extends VerticalLayout {
 
 	private Component search;
-	private final Grid<ConsumerWithOrders> grid;
+	private final VerticalLayout stops = new VerticalLayout();
 	private final Dialog summaryDialog = new Dialog();
 	private final Dialog reorderDialog = new Dialog("Изменение порядка доставки");
 	private final Dialog copyDialog = new Dialog();
@@ -49,9 +46,7 @@ public class DeliveryView extends VerticalLayout {
 	private final OrderService orderService;
 	private final ConsumerService consumerService;
 
-	private ConsumerWithOrders draggedItem;
-
-	private GridListDataView<ConsumerWithOrders> dataView = null;
+	private DeliveryStop draggedItem;
 
 	@Autowired
 	public DeliveryView(OrderService orderService, ConsumerService consumerService){
@@ -62,7 +57,11 @@ public class DeliveryView extends VerticalLayout {
 		setSpacing(false);
 
 		search = getSearchBox();
-		grid = getGrid();
+		stops.setPadding(false);
+		stops.setSpacing(false);
+		stops.setWidthFull();
+		Scroller scroller = new Scroller(stops);
+		scroller.setSizeFull();
 		Button copy = getBillCopyButton();
 		Button b = getSummaryButton();
 		Button clean = getCleanButton();
@@ -70,36 +69,29 @@ public class DeliveryView extends VerticalLayout {
 		setHeightFull();
 
 		refreshGrid();
-		add(search, summaryDialog, copy, b, clean, reorder, grid);
+		add(search, summaryDialog, copy, b, clean, reorder, scroller);
+		setFlexGrow(1, scroller);
 	}
 
-	private Grid<ConsumerWithOrders> getGrid(){
-		Grid<ConsumerWithOrders> grid = new Grid<>();
-		grid.setEmptyStateComponent(new Div("Записи не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
-		grid.setSelectionMode(Grid.SelectionMode.NONE);
-		grid.setHeightFull();
-
-		grid.addColumn(new ComponentRenderer<>(this::getGridItem));
-
-		return grid;
-	}
-
-	//TODO Оптимизировать (сделать загрузку только после открытия заказчика, а не при загрузке страницы)
-	private Component getGridItem(ConsumerWithOrders consumerWithOrders){
-		return new ConsumerWithOrdersComponent(consumerWithOrders, this.orderService);
-	}
-
-	private void refreshGrid(){
-		this.dataView = grid.setItems(getData());
+	private void refreshGrid() {
+		stops.removeAll();
+		List<DeliveryStop> data = orderService.getDeliveryStops();
+		if (data.isEmpty()) {
+			stops.add(new Div("Записи не найдены :("));
+			return;
+		}
+		for (DeliveryStop stop : data) {
+			stops.add(new ConsumerWithOrdersComponent(stop, orderService));
+		}
 	}
 
 	public void filterGrid(String filter) {
-		this.dataView.setFilter(item -> item.getName().toLowerCase().contains(filter.toLowerCase()));
-	}
-
-	private List<ConsumerWithOrders> getData(){
-		return orderService.getDeliveryData();
+		String needle = filter == null ? "" : filter.toLowerCase();
+		stops.getChildren().forEach(component -> {
+			if (component instanceof ConsumerWithOrdersComponent row) {
+				row.setVisible(row.getConsumerName().toLowerCase().contains(needle));
+			}
+		});
 	}
 
 	private Button getBillCopyButton(){
@@ -116,11 +108,12 @@ public class DeliveryView extends VerticalLayout {
 	}
 
 	private void renderBillCopyDialog() {
+		copyDialog.removeAll();
 		VerticalLayout layout = new VerticalLayout();
 		layout.add(new Div("Для копирования нажмите на текст (он сам выделится) и скопируйте его"));
 		TextArea textArea = new TextArea("Чеки доставки");
 		textArea.setValue(orderService.getBills());
-		textArea.setWidth("400px");
+		textArea.setWidthFull();
 		textArea.setHeight("300px");
 		textArea.setReadOnly(true);
 
@@ -204,14 +197,16 @@ public class DeliveryView extends VerticalLayout {
 	}
 
 	private void renderReorderDialog() {
+		reorderDialog.removeAll();
+		reorderDialog.getFooter().removeAll();
 		reorderDialog.getElement().getClassList().add("custom-dialog-class");
 
 		VerticalLayout dialogLayout = new VerticalLayout();
 		dialogLayout.add(new Div("Для изменения порядка зажмите строчку с заказчиком и перенесите в нужное место"));
 
-		List<ConsumerWithOrders> data = getData();
-		Grid<ConsumerWithOrders> reorderGrid = new Grid<>();
-		GridListDataView<ConsumerWithOrders> dataView = reorderGrid.setItems(data);
+		List<DeliveryStop> data = orderService.getDeliveryStops();
+		Grid<DeliveryStop> reorderGrid = new Grid<>();
+		GridListDataView<DeliveryStop> dataView = reorderGrid.setItems(data);
 		reorderGrid.setRowsDraggable(true);
 		reorderGrid.addColumn(this::getReorderGridItem);
 
@@ -221,7 +216,7 @@ public class DeliveryView extends VerticalLayout {
 		});
 
 		reorderGrid.addDropListener(e -> {
-			ConsumerWithOrders targetConsumer = e.getDropTargetItem().orElse(null);
+			DeliveryStop targetConsumer = e.getDropTargetItem().orElse(null);
 			GridDropLocation dropLocation = e.getDropLocation();
 
 			boolean droppedOntoItself = draggedItem.equals(targetConsumer);
@@ -253,9 +248,9 @@ public class DeliveryView extends VerticalLayout {
 
 		Button accept = new Button("Сохранить", e -> {
 			List<DeliveryOrderNumForConsumer> resultOrder = new ArrayList<>();
-			List<ConsumerWithOrders> items = dataView.getItems().toList();
+			List<DeliveryStop> items = dataView.getItems().toList();
 			for (int i = 0; i < items.size(); i++){
-				resultOrder.add(new DeliveryOrderNumForConsumer((int) items.get(i).getId(), i));
+				resultOrder.add(new DeliveryOrderNumForConsumer((int) items.get(i).id(), i));
 			}
 			consumerService.setDeliveryConsumersOrder(resultOrder);
 			refreshGrid();
@@ -264,8 +259,8 @@ public class DeliveryView extends VerticalLayout {
 		accept.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 		reorderDialog.getFooter().add(close, accept);
 	}
-	private String getReorderGridItem(ConsumerWithOrders consumerWithOrders){
-		return consumerWithOrders.getName() + " " + consumerWithOrders.getAddress();
+	private String getReorderGridItem(DeliveryStop stop){
+		return stop.name() + " " + stop.address();
 	}
 
 	public HorizontalLayout getSearchBox(){
