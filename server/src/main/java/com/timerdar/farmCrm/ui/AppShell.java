@@ -1,8 +1,11 @@
 package com.timerdar.farmCrm.ui;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.shared.ui.Transport;
 
+@Push(transport = Transport.LONG_POLLING)
 @PWA(
 		name = "Система учета заказов на фермерскую продукцию",
 		shortName = "Заказы Фермы")
