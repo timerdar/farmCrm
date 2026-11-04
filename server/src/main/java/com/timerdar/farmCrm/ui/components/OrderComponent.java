@@ -91,7 +91,6 @@ public class OrderComponent extends HorizontalLayout {
 		countEditor.setMaxWidth("80px");
 
 		countSaveButton.addClickListener(e -> saveCount());
-		countSaveButton.addClickListener(e -> updateMainEntity.run());
 
 		add(nameLabel, countDisplay, countEditor, countSaveButton);
 		//firstRow.add(nameLabel, countDisplay, countEditor, countSaveButton);
@@ -112,7 +111,6 @@ public class OrderComponent extends HorizontalLayout {
 			weightEditor.setMaxWidth("80px");
 
 			weightSaveButton.addClickListener(e -> saveWeight());
-			weightSaveButton.addClickListener(e -> updateMainEntity.run());
 
 			add(weightDisplay, weightEditor, weightSaveButton);
 			//firstRow.add(weightDisplay, weightEditor, weightSaveButton);
@@ -121,7 +119,7 @@ public class OrderComponent extends HorizontalLayout {
 
 		if(order.getStatus() == OrderStatus.CREATED){
 			Button actionButton = new Button(new Icon(VaadinIcon.CART_O));
-			actionButton.addClickListener(e -> changeStatusAction(updateGrid, updateMainEntity, "DELIVERY"));
+			actionButton.addClickListener(e -> changeStatusAction(updateGrid, "DELIVERY"));
 
 			ConfirmDialog dialog = new ConfirmDialog();
 
@@ -133,7 +131,7 @@ public class OrderComponent extends HorizontalLayout {
 			dialog.addCancelListener(e -> e.getSource().close());
 
 			dialog.setConfirmText("Удалить");
-			dialog.addConfirmListener(e -> changeStatusAction(updateGrid, updateMainEntity, "DELETED"));
+			dialog.addConfirmListener(e -> changeStatusAction(updateGrid, "DELETED"));
 
 			Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
 			deleteButton.addClickListener(e -> dialog.open());
@@ -147,7 +145,7 @@ public class OrderComponent extends HorizontalLayout {
 
 			Button actionButton = new Button(new Icon(VaadinIcon.LEVEL_LEFT));
 			actionButton.addClickListener(e -> {
-				changeStatusAction(updateGrid, updateMainEntity, "CREATED");
+				changeStatusAction(updateGrid, "CREATED");
 				this.removeFromParent();
 			});
 
@@ -155,7 +153,7 @@ public class OrderComponent extends HorizontalLayout {
 			done.setValue(status == OrderStatus.DONE);
 			this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
 			done.addClickListener(e -> {
-				changeStatusAction(updateGrid, updateMainEntity, done.getValue() ? "DONE" : "DELIVERY");
+				changeStatusAction(updateGrid, done.getValue() ? "DONE" : "DELIVERY");
 				this.getStyle().set("background-color", done.getValue() ? "#4caf50" : "white");
 			});
 
@@ -214,12 +212,11 @@ public class OrderComponent extends HorizontalLayout {
 		updateMainEntity.run();
 	}
 
-	private void changeStatusAction(Runnable updateGrid, Runnable updateMainEntity, String newStatus){
+	private void changeStatusAction(Runnable updateGrid, String newStatus){
 		OrderChangeRequest req = new OrderChangeRequest();
 		req.setId(id);
 		req.setStatus(newStatus);
 		orderService.changeStatus(req);
 		updateGrid.run();
-		updateMainEntity.run();
 	}
 }

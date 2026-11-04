@@ -13,8 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -116,16 +119,38 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public List<ConsumerWithOrders> getDeliveryData() {
-        List<Long> consumerIds = orderRepository.getDeliveryConsumerIds();
-        List<ConsumerWithOrders> consumers = new ArrayList<>();
-        for (Long consumerId: consumerIds){
-            Consumer consumer = consumerService.getConsumerById(consumerId);
-            List<OrderWithNameAndWeightable> orders = getOrdersWithName(consumerId, "consumers", "DELIVERY");
-            orders.addAll(getOrdersWithName(consumerId, "consumers", "DONE"));
-            consumers.add(new ConsumerWithOrders(consumer, orders));
+    private static final EnumSet<OrderStatus> DELIVERY_STATUSES = EnumSet.of(OrderStatus.DELIVERY, OrderStatus.DONE);
+
+    public List<DeliveryStop> getDeliveryStops() {
+        List<DeliveryStop> stops = new ArrayList<>();
+        for (Object[] row : orderRepository.findDeliveryStops()) {
+            stops.add(new DeliveryStop(
+                    asLong(row[0]),
+                    text(row[1]),
+                    text(row[2]),
+                    text(row[3]),
+                    (int) asLong(row[4]),
+                    (int) asLong(row[5]),
+                    (int) asLong(row[6])));
         }
-        return consumers;
+        return stops;
+    }
+
+    public List<OrderWithNameAndWeightable> getConsumerDeliveryOrders(long consumerId) {
+        return toNamedOrders(orderRepository.findConsumerDeliveryOrders(consumerId, DELIVERY_STATUSES));
+    }
+
+    public List<ConsumerWithOrders> getDeliveryData() {
+        Map<Long, ConsumerWithOrders> grouped = new LinkedHashMap<>();
+        for (Object[] row : orderRepository.findDeliveryOrdersWithNames(DELIVERY_STATUSES)) {
+            Order order = (Order) row[0];
+            Product product = (Product) row[1];
+            Consumer consumer = (Consumer) row[2];
+            ConsumerWithOrders bucket = grouped.computeIfAbsent(consumer.getId(),
+                    id -> new ConsumerWithOrders(consumer, new ArrayList<>()));
+            bucket.getOrders().add(new OrderWithNameAndWeightable(order, product.getName(), product.isWeighed()));
+        }
+        return new ArrayList<>(grouped.values());
     }
 
 	public List<Consumer> getCreatedConsumer(){
@@ -155,18 +180,23 @@ public class OrderService {
     }
 
     public List<DeliverySummaryItem> getDeliverySummary(){
-        List<Product> products = productService.getProductsFromDelivery();
+        Map<String, SummaryAcc> grouped = new LinkedHashMap<>();
+        for (Object[] row : orderRepository.findDeliverySummaryRows(DELIVERY_STATUSES)) {
+            String productName = text(row[0]);
+            int createdCount = (int) asLong(row[1]);
+            String consumerName = text(row[2]);
+            double count = row[3] instanceof Number number ? number.doubleValue() : 0;
+            OrderStatus status = (OrderStatus) row[4];
+            SummaryAcc acc = grouped.computeIfAbsent(productName, name -> new SummaryAcc(createdCount));
+            acc.orderedCount += count;
+            if (status == OrderStatus.DELIVERY) {
+                acc.consumers.put(consumerName, count);
+            }
+        }
         List<DeliverySummaryItem> res = new ArrayList<>();
-        for (Product product: products){
-			List<OrderWithNameAndWeightable> orders = getOrdersWithName(product.getId(), "products", OrderStatus.DELIVERY.toString());
-			HashMap<String, Double> consumers = new HashMap<>();
-			for(OrderWithNameAndWeightable order : orders){
-				consumers.put(order.getName(), order.getCount());
-			}
-            res.add(new DeliverySummaryItem(product.getName(),
-                    product.getCreatedCount(),
-                    getOrdersCount(product.getId(), OrderStatus.DELIVERY) + getOrdersCount(product.getId(), OrderStatus.DONE),
-					consumers));
+        for (Map.Entry<String, SummaryAcc> entry : grouped.entrySet()) {
+            SummaryAcc acc = entry.getValue();
+            res.add(new DeliverySummaryItem(entry.getKey(), acc.createdCount, (int) acc.orderedCount, acc.consumers));
         }
 		log.info("Получение сводки доставки");
         return res;
@@ -202,7 +232,10 @@ public class OrderService {
 	public String getBillOfConsumer(long consumerId){
 		StringBuilder sb = new StringBuilder();
 		int s = 0;
-		for (OrderWithNameAndWeightable order : getOrdersWithName(consumerId, "consumers", "DELIVERY")){
+		for (OrderWithNameAndWeightable order : getConsumerDeliveryOrders(consumerId)){
+			if (order.getStatus() != OrderStatus.DELIVERY) {
+				continue;
+			}
 			s = s + order.getCost();
 			sb.append(order.getName()).append(" ");
 			if(order.isWeighed())
@@ -231,6 +264,34 @@ public class OrderService {
 			log.info("Удален заказ: {}", order);
 		}
 		productService.deleteProduct(productId);
+	}
+
+	private List<OrderWithNameAndWeightable> toNamedOrders(List<Object[]> rows) {
+		List<OrderWithNameAndWeightable> orders = new ArrayList<>();
+		for (Object[] row : rows) {
+			Order order = (Order) row[0];
+			Product product = (Product) row[1];
+			orders.add(new OrderWithNameAndWeightable(order, product.getName(), product.isWeighed()));
+		}
+		return orders;
+	}
+
+	private static long asLong(Object value) {
+		return value instanceof Number number ? number.longValue() : 0L;
+	}
+
+	private static String text(Object value) {
+		return value == null ? "" : value.toString();
+	}
+
+	private static final class SummaryAcc {
+		private final int createdCount;
+		private double orderedCount;
+		private final Map<String, Double> consumers = new HashMap<>();
+
+		private SummaryAcc(int createdCount) {
+			this.createdCount = createdCount;
+		}
 	}
 
 	public void groupedToDelivery(List<OrderWithNameAndWeightable> orders){
