@@ -7,11 +7,9 @@ import com.timerdar.farmCrm.service.OrderService;
 import com.timerdar.farmCrm.service.ProductService;
 import com.timerdar.farmCrm.ui.EntitiesListView;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -79,17 +77,12 @@ public class ProductsView extends EntitiesListView {
 	}
 
 	@Override
-	public Card getEntityCard(Object object) {
+	public ListRow describeEntity(Object object) {
 		Product product = (Product) object;
-		Card card = new Card();
-		card.setTitle(product.getName());
-		VerticalLayout subtitle = new VerticalLayout();
-		subtitle.add(
-				new Div("Цена - " + product.getCost() + (product.isWeighed() ? "руб/кг" : "руб/шт")),
-				new Div("Изготовлено - " + product.getCreatedCount())
-		);
-		card.setSubtitle(subtitle);
-		return card;
+		return new ListRow(
+				product.getName(),
+				"Цена - " + product.getCost() + (product.isWeighed() ? "руб/кг" : "руб/шт"),
+				"Изготовлено - " + product.getCreatedCount());
 	}
 
 	@Override

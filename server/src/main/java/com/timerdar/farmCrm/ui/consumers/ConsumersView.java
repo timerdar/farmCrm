@@ -5,9 +5,7 @@ import com.timerdar.farmCrm.model.Consumer;
 import com.timerdar.farmCrm.service.ConsumerService;
 import com.timerdar.farmCrm.ui.EntitiesListView;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -85,16 +83,12 @@ public class ConsumersView extends EntitiesListView {
 	}
 
 	@Override
-	public Card getEntityCard(Object object){
+	public ListRow describeEntity(Object object) {
 		Consumer consumer = (Consumer) object;
-		Card card = new Card();
-		card.setTitle(consumer.getName());
-		VerticalLayout l = new VerticalLayout(
-				new Div(consumer.getAddress()),
-				new Div("Сумма выкупа - " + consumer.getTotalSum() + " руб."));
-		l.setSpacing(false);
-		card.setSubtitle(l);
-		return card;
+		return new ListRow(
+				consumer.getName(),
+				consumer.getAddress(),
+				"Сумма выкупа - " + consumer.getTotalSum() + " руб.");
 	}
 
 }

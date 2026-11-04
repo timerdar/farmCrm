@@ -15,12 +15,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Location;
@@ -69,7 +67,7 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 
 	private void configureGrid(){
 		grid.setEmptyStateComponent(new Div("Заказы не найдены :("));
-		grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+		grid.addClassName("orders-grid");
 		grid.addThemeVariants(GridVariant.LUMO_COLUMN_BORDERS);
 		grid.setHeightFull();
 		grid.setWidthFull();
@@ -88,71 +86,69 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 	}
 
 	private void createCountColumn(){
-		grid.addColumn(new ComponentRenderer<>(order -> {
-			Div wrapper = new Div();
-			wrapper.setWidthFull();
-
-			Span text = new Span(order.getCount() + " шт");
-			wrapper.add(text);
-
-			text.addClickListener(e -> {
-				wrapper.removeAll();
-
-				NumberField field = new NumberField();
-				field.setWidthFull();
-				field.setRequired(true);
-				field.setValue(order.getCount());
-				wrapper.add(field);
-				field.focus();
-
-				field.addBlurListener(ev -> {
-					changeCount(order.getId(), field.getValue());
-					wrapper.removeAll();
-					wrapper.add(new Span(order.getCount() + " шт"));
-				});
-			});
-
-			return wrapper;
-		})).setWidth("20%");
+		grid.addColumn(LitRenderer.<OrderWithNameAndWeightable>of(
+						"<span class=\"cell-action\" @click=${editCount}>${item.countLabel}</span>")
+				.withProperty("countLabel", order -> order.getCount() + " шт")
+				.withFunction("editCount", this::editCount))
+				.setWidth("20%");
 	}
 
 	private void createWeightColumn(){
-		grid.addColumn(new ComponentRenderer<>(order -> {
-			Div wrapper = new Div();
-			wrapper.setWidthFull();
-
-			Span text = new Span(order.isWeighed() ? order.getWeight() + " кг" : "-");
-			wrapper.add(text);
-
-			if(order.isWeighed()) {
-				text.addClickListener(e -> {
-					wrapper.removeAll();
-
-					NumberField field = new NumberField();
-					field.setWidthFull();
-					field.setRequired(true);
-					field.setValue(order.getWeight());
-					wrapper.add(field);
-					field.focus();
-
-					field.addBlurListener(ev -> {
-						changeWeight(order.getId(), field.getValue());
-						wrapper.removeAll();
-						wrapper.add(new Span(order.getWeight() + " кг"));
-					});
-
-				});
-			}
-
-			return wrapper;
-		})).setWidth("20%");
+		grid.addColumn(LitRenderer.<OrderWithNameAndWeightable>of(
+						"<span class=\"${item.weightClass}\" @click=${editWeight}>${item.weightLabel}</span>")
+				.withProperty("weightLabel", order -> order.isWeighed() ? order.getWeight() + " кг" : "-")
+				.withProperty("weightClass", order -> order.isWeighed() ? "cell-action" : "")
+				.withFunction("editWeight", this::editWeight))
+				.setWidth("20%");
 	}
 
 	private void createCostColumn(){
-		grid.addColumn(new ComponentRenderer<>(item -> {
-					Span span = new Span(item.getCost() + " руб.");
-					return span;
-		})).setWidth("20%");
+		grid.addColumn(order -> order.getCost() + " руб.").setWidth("20%");
+	}
+
+	private void editCount(OrderWithNameAndWeightable order) {
+		openNumberDialog("Количество", order.getName(), "Штук", order.getCount(),
+				value -> changeCount(order.getId(), value));
+	}
+
+	private void editWeight(OrderWithNameAndWeightable order) {
+		if (!order.isWeighed()) {
+			return;
+		}
+		openNumberDialog("Вес", order.getName(), "Килограммы", order.getWeight(),
+				value -> changeWeight(order.getId(), value));
+	}
+
+	private void openNumberDialog(String title, String itemName, String fieldLabel, double current,
+			java.util.function.DoubleConsumer onSave) {
+		Dialog dialog = new Dialog();
+		dialog.setHeaderTitle(title);
+		dialog.setWidth("min(92vw, 22rem)");
+
+		NumberField field = new NumberField(fieldLabel);
+		field.setWidthFull();
+		field.setMin(0);
+		field.setValue(current);
+
+		dialog.add(new Div(itemName), field);
+		dialog.addOpenedChangeListener(event -> {
+			if (event.isOpened()) {
+				field.focus();
+			}
+		});
+
+		Button cancel = new Button("Отмена", e -> dialog.close());
+		Button save = new Button("Сохранить", e -> {
+			if (field.getValue() == null) {
+				Notification.show("Заполните поле");
+				return;
+			}
+			onSave.accept(field.getValue());
+			dialog.close();
+		});
+		save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+		dialog.getFooter().add(cancel, save);
+		dialog.open();
 	}
 
 	public void refreshGrid(){
@@ -192,8 +188,12 @@ public abstract class OrdersListView extends VerticalLayout implements BeforeEnt
 		GridContextMenu<OrderWithNameAndWeightable> menu = new GridContextMenu<OrderWithNameAndWeightable>(grid);
 
 		menu.addItem("В доставку", e -> e.getItem().ifPresent(order -> {
-			for(OrderWithNameAndWeightable selectedOrder : grid.asMultiSelect().getValue())
-				moveToDelivery(selectedOrder);
+			var selected = grid.asMultiSelect().getValue();
+			if (selected.isEmpty()) {
+				moveToDelivery(order);
+			} else {
+				selected.forEach(this::moveToDelivery);
+			}
 			refreshGrid();
 			Notification.show("В доставку");
 		}));
